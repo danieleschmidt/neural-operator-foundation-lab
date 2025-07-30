@@ -1,0 +1,19 @@
+# Core dependencies
+torch>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+matplotlib>=3.6.0
+tqdm>=4.64.0
+einops>=0.6.0
+h5py>=3.8.0
+
+# Optional JAX backend
+# Uncomment for JAX support:
+# jax>=0.4.0
+# jaxlib>=0.4.0
+
+# Visualization (optional)
+# Uncomment for advanced visualization:
+# plotly>=5.14.0
+# dash>=2.10.0
+# vtk>=9.2.0
