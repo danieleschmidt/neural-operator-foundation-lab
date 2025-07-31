@@ -1,88 +1,30 @@
-# GitHub Actions Workflows Setup
+# GitHub Actions Workflows Setup Required
 
-⚠️ **Note**: Per Terragon Labs policy, GitHub Actions workflows must be manually created by repository maintainers for security reasons.
+⚠️ **Manual Setup Required**: The comprehensive GitHub Actions workflows have been documented but require manual implementation by a repository administrator with `workflows` permission.
 
-## Required Manual Setup
+## 📁 Workflow Documentation
 
-The following GitHub Actions workflows should be created manually in `.github/workflows/`:
+Complete GitHub Actions workflows are available in:
+**[docs/GITHUB_WORKFLOWS.md](docs/GITHUB_WORKFLOWS.md)**
 
-### 1. Continuous Integration (`ci.yml`)
-```yaml
-name: CI
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.9, 3.10, 3.11]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          pip install -r requirements-dev.txt
-          pip install -e .
-      - name: Run tests
-        run: pytest tests/ --cov=neural_operator_lab
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-```
+## 🚀 Included Workflows
 
-### 2. Code Quality (`quality.yml`)
-```yaml
-name: Code Quality
-on: [push, pull_request]
-jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
-      - name: Install dependencies
-        run: pip install -r requirements-dev.txt
-      - name: Run black
-        run: black --check src/ tests/
-      - name: Run isort
-        run: isort --check-only src/ tests/
-      - name: Run flake8
-        run: flake8 src/ tests/
-      - name: Run mypy
-        run: mypy src/neural_operator_lab
-```
+1. **CI/CD Pipeline** (`ci.yml`) - Testing, linting, security scanning
+2. **Security Scanning** (`security.yml`) - CodeQL, vulnerability detection, SBOM
+3. **Release Automation** (`release.yml`) - PyPI publishing, Docker builds
 
-### 3. Security Scanning (`security.yml`)
-```yaml
-name: Security
-on: [push, pull_request]
-jobs:
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Bandit
-        run: |
-          pip install bandit
-          bandit -r src/
-      - name: Run Safety
-        run: |
-          pip install safety
-          safety check -r requirements.txt
-```
+## 🔧 Setup Requirements
 
-## Setup Instructions
+- Repository administrator access
+- `workflows` permission enabled
+- Required secrets configuration (Codecov, Snyk, PyPI tokens)
 
-1. **Create workflows manually** in the GitHub web interface
-2. **Configure secrets** in repository settings:
-   - `CODECOV_TOKEN` for test coverage
-   - `PYPI_TOKEN` for package publishing (if needed)
-3. **Enable branch protection** rules requiring status checks
-4. **Configure Dependabot** for dependency updates
+## 💡 Quick Start
 
-For detailed workflow configurations, see [DEVELOPMENT.md](DEVELOPMENT.md#github-actions).
+1. Review workflow documentation in `docs/GITHUB_WORKFLOWS.md`
+2. Create `.github/workflows/` directory 
+3. Copy workflow files from documentation
+4. Configure required secrets
+5. Test with a sample push/PR
+
+The workflows provide enterprise-grade CI/CD automation with comprehensive security scanning and automated releases.

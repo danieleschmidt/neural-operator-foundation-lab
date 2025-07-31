@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  neural-operator-lab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: neural-operator-lab-dev
+    volumes:
+      - .:/app
+      - neural-operator-data:/data
+      - neural-operator-models:/models
+    environment:
+      - PYTHONPATH=/app/src
+      - NEURAL_OP_SECURE_MODE=true
+      - NEURAL_OP_VALIDATE_MODELS=true
+    ports:
+      - "8888:8888"  # Jupyter
+      - "6006:6006"  # TensorBoard
+      - "8080:8080"  # Dashboard
+    command: ["python", "-m", "neural_operator_lab"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import neural_operator_lab; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: neural-operator-jupyter
+    volumes:
+      - .:/app
+      - neural-operator-data:/data
+      - neural-operator-models:/models
+    environment:
+      - PYTHONPATH=/app/src
+      - JUPYTER_ENABLE_LAB=yes
+    ports:
+      - "8888:8888"
+    command: ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+
+  tensorboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: neural-operator-tensorboard
+    volumes:
+      - ./logs:/logs
+    ports:
+      - "6006:6006"
+    command: ["tensorboard", "--logdir=/logs", "--host=0.0.0.0", "--port=6006"]
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: neural-operator-tests
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app/src
+    command: ["pytest", "--cov=neural_operator_lab", "--cov-report=html", "--cov-report=term-missing"]
+
+  security-scan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    container_name: neural-operator-security
+    volumes:
+      - .:/app
+    command: ["bandit", "-r", "src/", "-f", "json", "-o", "/app/bandit-report.json"]
+
+volumes:
+  neural-operator-data:
+    driver: local
+  neural-operator-models:
+    driver: local
+
+networks:
+  default:
+    name: neural-operator-network
