@@ -1,0 +1,99 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Debug Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "CUDA_VISIBLE_DEVICES": "0"
+      }
+    },
+    {
+      "name": "Python: Train Model",
+      "type": "python",
+      "request": "launch",
+      "module": "neural_operator_lab.training.train",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": [
+        "--config", "configs/train_config.yaml",
+        "--data", "data/samples",
+        "--output", "experiments/debug"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "CUDA_VISIBLE_DEVICES": "0",
+        "DEBUG": "true"
+      }
+    },
+    {
+      "name": "Python: Run Benchmark",
+      "type": "python",
+      "request": "launch",
+      "module": "neural_operator_lab.benchmarks.run",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": [
+        "--model", "fno",
+        "--dataset", "burgers_2d",
+        "--batch-size", "4"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "CUDA_VISIBLE_DEVICES": "0"
+      }
+    },
+    {
+      "name": "Python: Test Suite",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": [
+        "tests/",
+        "-v",
+        "--tb=short"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "CUDA_VISIBLE_DEVICES": "0"
+      }
+    },
+    {
+      "name": "Python: Debug Test",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": [
+        "${file}",
+        "-v",
+        "-s"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "CUDA_VISIBLE_DEVICES": "0"
+      }
+    },
+    {
+      "name": "Python: Interactive Training",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/interactive_training.py",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "CUDA_VISIBLE_DEVICES": "0",
+        "INTERACTIVE": "true"
+      }
+    }
+  ]
+}

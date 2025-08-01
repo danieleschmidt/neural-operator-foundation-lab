@@ -1,0 +1,137 @@
+{
+  "name": "Neural Operator Foundation Lab",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  
+  // Configure tool-specific properties
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/conda/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": false,
+        "python.linting.flake8Enabled": false,
+        "python.linting.ruffEnabled": true,
+        "python.formatting.provider": "black",
+        "python.formatting.blackPath": "/opt/conda/bin/black",
+        "python.sortImports.path": "/opt/conda/bin/isort",
+        "python.testing.pytestEnabled": true,
+        "python.testing.pytestPath": "/opt/conda/bin/pytest",
+        "python.testing.pytestArgs": ["tests"],
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": true
+        },
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true,
+          "**/.pytest_cache": true,
+          "**/.ruff_cache": true,
+          "**/wandb": true,
+          "**/checkpoints": true,
+          "**/logs": true
+        },
+        "jupyter.kernels.filter": [
+          {
+            "path": "/opt/conda/bin/python",
+            "type": "pythonEnvironment"
+          }
+        ]
+      },
+      
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "charliermarsh.ruff",
+        "ms-python.mypy-type-checker",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.vscode-jupyter-cell-tags",
+        "ms-toolsai.vscode-jupyter-slideshow",
+        "github.copilot",
+        "github.copilot-chat",
+        "eamodio.gitlens",
+        "ms-vscode.makefile-tools",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-json",
+        "editorconfig.editorconfig",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers",
+        "davidanson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "streetsidesoftware.code-spell-checker",
+        "ms-python.debugpy"
+      ]
+    }
+  },
+
+  // Use a non-root user for security
+  "remoteUser": "developer",
+  
+  // Container environment variables
+  "containerEnv": {
+    "PYTHONPATH": "/workspace/src",
+    "CUDA_VISIBLE_DEVICES": "0",
+    "JUPYTER_ENABLE_LAB": "true"
+  },
+  
+  // Forward ports for development servers
+  "forwardPorts": [
+    8888,  // Jupyter
+    6006,  // TensorBoard
+    8080,  // Model serving
+    5000   // MLflow
+  ],
+  
+  "portsAttributes": {
+    "8888": {
+      "label": "Jupyter Lab",
+      "onAutoForward": "notify"
+    },
+    "6006": {
+      "label": "TensorBoard", 
+      "onAutoForward": "silent"
+    },
+    "8080": {
+      "label": "Model Server",
+      "onAutoForward": "silent"
+    },
+    "5000": {
+      "label": "MLflow UI",
+      "onAutoForward": "silent"
+    }
+  },
+  
+  // Lifecycle scripts
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "git config --global --add safe.directory /workspace",
+  
+  // Development conveniences
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "username": "developer",
+      "uid": "1000",
+      "gid": "1000"
+    }
+  },
+  
+  // Mount GPU for CUDA development
+  "runArgs": [
+    "--gpus=all",
+    "--shm-size=16g"
+  ],
+  
+  // Additional mounts for data and models
+  "mounts": [
+    "source=/tmp,target=/tmp,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.ssh,target=/home/developer/.ssh,type=bind,consistency=cached,readonly",
+    "source=${localEnv:HOME}/.gitconfig,target=/home/developer/.gitconfig,type=bind,consistency=cached,readonly"
+  ]
+}

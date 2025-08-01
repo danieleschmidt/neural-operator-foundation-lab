@@ -1,0 +1,171 @@
+{
+  // Python configuration
+  "python.defaultInterpreterPath": "./venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": false,
+  "python.linting.ruffEnabled": true,
+  "python.formatting.provider": "black",
+  "python.sortImports.provider": "isort",
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+  // Editor configuration
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.fixAll.ruff": true
+  },
+  "editor.rulers": [88],
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.trimAutoWhitespace": true,
+
+  // File associations and exclusions
+  "files.associations": {
+    "*.py": "python",
+    "*.pyx": "python",
+    "*.cu": "cuda-cpp",
+    "*.cuh": "cuda-cpp"
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
+    "**/.mypy_cache": true,
+    "**/wandb": true,
+    "**/checkpoints": true,
+    "**/logs": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/wandb": true,
+    "**/checkpoints": true,
+    "**/data": true,
+    "**/models": true
+  },
+
+  // Jupyter configuration
+  "jupyter.kernels.filter": [
+    {
+      "path": "./venv/bin/python",
+      "type": "pythonEnvironment"
+    }
+  ],
+  "jupyter.interactiveWindow.creationMode": "perFile",
+  "jupyter.askForKernelRestart": false,
+
+  // Git configuration
+  "git.autofetch": true,
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.postCommitCommand": "sync",
+
+  // Terminal configuration
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "terminal.integrated.profiles.linux": {
+    "zsh": {
+      "path": "/bin/zsh",
+      "args": ["-l"]
+    }
+  },
+
+  // Language-specific settings
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "editor.tabSize": 4
+  },
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[markdown]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.wordWrap": "on"
+  },
+  "[dockerfile]": {
+    "editor.tabSize": 4
+  },
+
+  // Extensions configuration
+  "ruff.args": ["--config", "pyproject.toml"],
+  "black-formatter.args": ["--config", "pyproject.toml"],
+  "isort.args": ["--settings-path", "pyproject.toml"],
+  "mypy-type-checker.args": ["--config-file", "pyproject.toml"],
+
+  // Spelling
+  "cSpell.words": [
+    "pytorch",
+    "cuda",
+    "cudnn",
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "seaborn",
+    "plotly",
+    "wandb",
+    "mlflow",
+    "tensorboard",
+    "jupyter",
+    "pytest",
+    "mypy",
+    "ruff",
+    "isort",
+    "pyproject",
+    "toml",
+    "yaml",
+    "dockerfile",
+    "devcontainer",
+    "terragon",
+    "neural",
+    "operator",
+    "fourier",
+    "transformer",
+    "probabilistic",
+    "pdfs",
+    "navier",
+    "stokes",
+    "burgers",
+    "darcy",
+    "elasticity",
+    "electromagnetics"
+  ],
+
+  // Workbench
+  "workbench.colorTheme": "Default Dark+",
+  "workbench.iconTheme": "vs-seti",
+  "workbench.editor.enablePreview": false,
+
+  // Explorer
+  "explorer.confirmDelete": false,
+  "explorer.confirmDragAndDrop": false,
+
+  // IntelliSense and suggestions
+  "editor.suggest.insertMode": "replace",
+  "editor.acceptSuggestionOnCommitCharacter": false,
+  "editor.suggestSelection": "first",
+
+  // Performance
+  "extensions.ignoreRecommendations": false,
+  "editor.largeFileOptimizations": false
+}

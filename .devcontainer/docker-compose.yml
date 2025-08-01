@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+      - /var/run/docker.sock:/var/run/docker-host.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker-host.sock
+    command: sleep infinity
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  jupyter:
+    image: jupyter/pytorch-notebook:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - ../..:/home/jovyan/work
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=development
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  tensorboard:
+    image: tensorflow/tensorflow:latest-gpu
+    ports:
+      - "6006:6006"
+    volumes:
+      - ../logs:/logs
+    command: tensorboard --logdir=/logs --host=0.0.0.0 --port=6006
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  mlflow:
+    image: python:3.9-slim
+    ports:
+      - "5000:5000"
+    volumes:
+      - ../mlruns:/mlruns
+      - ../artifacts:/artifacts
+    command: >
+      bash -c "pip install mlflow[extras] &&
+               mlflow server --host 0.0.0.0 --port 5000 
+               --backend-store-uri sqlite:///mlruns/mlflow.db
+               --default-artifact-root /artifacts"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: neural_ops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  redis_data:
+  postgres_data:

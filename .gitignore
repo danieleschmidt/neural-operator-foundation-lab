@@ -205,3 +205,38 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ML/DL specific
+*.ckpt
+*.pth
+*.pt
+*.pkl
+*.h5
+*.hdf5
+*.npz
+*.npy
+wandb/
+runs/
+logs/
+checkpoints/
+models/
+data/
+datasets/
+experiments/
+outputs/
+mlruns/
+.tensorboard/
+
+# CUDA/GPU
+*.cubin
+*.cuabin
+
+# Large files
+*.bin
+*.model
+*.safetensors
+
+# Development tools
+*.prof
+.DS_Store
+Thumbs.db

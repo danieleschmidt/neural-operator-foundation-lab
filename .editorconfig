@@ -1,5 +1,9 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
 root = true
 
+# All files
 [*]
 charset = utf-8
 end_of_line = lf
@@ -8,18 +12,61 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
 
+# Python files
 [*.{py,pyx}]
 indent_size = 4
 max_line_length = 88
 
+# YAML/YML files
 [*.{yml,yaml}]
 indent_size = 2
 
-[*.{json,js,ts}]
+# JSON/JavaScript/TypeScript files
+[*.{json,js,ts,jsx,tsx}]
 indent_size = 2
 
-[*.{md,rst}]
-trim_trailing_whitespace = false
+# HTML/CSS files
+[*.{html,css,scss,sass}]
+indent_size = 2
 
-[Makefile]
+# Markdown and reStructuredText
+[*.{md,rst,markdown}]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# Configuration files
+[*.{toml,ini,cfg}]
+indent_size = 4
+
+# Shell scripts
+[*.{sh,bash,zsh}]
+indent_size = 2
+
+# Dockerfile
+[Dockerfile*]
+indent_size = 4
+
+# Makefile
+[{Makefile,*.mk}]
 indent_style = tab
+indent_size = 4
+
+# XML files
+[*.xml]
+indent_size = 2
+
+# CUDA files
+[*.{cu,cuh}]
+indent_size = 4
+
+# Jupyter notebooks
+[*.ipynb]
+indent_size = 2
+
+# GitHub Actions
+[.github/workflows/*.{yml,yaml}]
+indent_size = 2
+
+# Docker Compose
+[docker-compose*.{yml,yaml}]
+indent_size = 2

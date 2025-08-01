@@ -1,0 +1,65 @@
+{
+  "recommendations": [
+    // Python development
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "ms-python.isort",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    "ms-python.debugpy",
+    
+    // Jupyter
+    "ms-toolsai.jupyter",
+    "ms-toolsai.vscode-jupyter-cell-tags",
+    "ms-toolsai.vscode-jupyter-slideshow",
+    
+    // AI assistance
+    "github.copilot",
+    "github.copilot-chat",
+    
+    // Git and collaboration
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    
+    // Build tools
+    "ms-vscode.makefile-tools",
+    
+    // File formats
+    "redhat.vscode-yaml",
+    "ms-vscode.vscode-json",
+    "editorconfig.editorconfig",
+    
+    // Containers and Docker
+    "ms-azuretools.vscode-docker",
+    "ms-vscode-remote.remote-containers",
+    
+    // Documentation
+    "davidanson.vscode-markdownlint",
+    "yzhang.markdown-all-in-one",
+    "lextudio.restructuredtext",
+    
+    // Code quality
+    "streetsidesoftware.code-spell-checker",
+    "ms-vsliveshare.vsliveshare",
+    
+    // Themes and UI
+    "pkief.material-icon-theme",
+    "github.github-vscode-theme",
+    
+    // CUDA development
+    "nvidia.nsight-vscode-edition",
+    
+    // Performance profiling
+    "ms-python.flake8",
+    
+    // Configuration files
+    "tamasfe.even-better-toml",
+    
+    // REST APIs
+    "humao.rest-client"
+  ],
+  "unwantedRecommendations": [
+    "ms-python.pylint",
+    "ms-python.flake8"
+  ]
+}
