@@ -1,0 +1,133 @@
+# Terragon Autonomous SDLC Configuration
+# Repository: neural-operator-foundation-lab
+# Maturity Level: MATURING (50-75%)
+# Generated: 2025-08-01
+
+repository:
+  name: "neural-operator-foundation-lab"
+  maturity: "maturing"
+  primary_language: "python"
+  framework: "pytorch"
+  type: "research_ml"
+
+scoring:
+  weights:
+    # Weights optimized for MATURING repositories
+    wsjf: 0.6          # Higher weight on business value prioritization
+    ice: 0.1           # Lower weight on simple impact scoring
+    technicalDebt: 0.2 # Focus on debt management
+    security: 0.1      # Maintain security focus
+
+  thresholds:
+    minScore: 15           # Higher threshold for mature repos
+    maxRisk: 0.7          # More conservative risk tolerance
+    securityBoost: 2.0    # Double security-related scores
+    complianceBoost: 1.8  # Boost compliance items
+    
+  penalties:
+    documentationOnly: 0.6    # Lower priority for docs-only changes
+    dependencyUpdate: 0.8     # Moderate priority for updates
+    testingOnly: 0.7         # Focus on implementation over testing
+
+discovery:
+  sources:
+    - gitHistory         # Parse commit messages and TODO comments
+    - staticAnalysis     # Use existing linting and type checking
+    - issueTrackers      # GitHub issues and PRs (when available)
+    - vulnerabilityDatabases # Security scanning results
+    - performanceMonitoring # Profile and benchmark results
+    - codeMetrics       # Complexity and hotspot analysis
+
+  tools:
+    staticAnalysis:
+      - "flake8"         # Already configured
+      - "mypy"           # Type checking enabled  
+      - "bandit"         # Security analysis
+      - "safety"         # Dependency vulnerability scanning
+    
+    qualityMetrics:
+      - "radon"          # Complexity analysis
+      - "vulture"        # Dead code detection
+      - "xenon"          # Cyclomatic complexity
+    
+    performance:
+      - "pytest-benchmark" # Performance regression detection
+      - "memory_profiler"  # Memory usage analysis
+      - "line_profiler"    # Line-by-line profiling
+
+execution:
+  maxConcurrentTasks: 1
+  
+  testRequirements:
+    minCoverage: 85          # Higher coverage for mature repo
+    performanceRegression: 5  # Max 5% performance degradation
+    typeCheckPassing: true   # Strict type checking required
+    
+  rollbackTriggers:
+    - testFailure
+    - buildFailure  
+    - securityViolation
+    - coverageDropBelow: 80
+    - performanceDegradation: 10
+
+  branchStrategy:
+    prefix: "auto-value"
+    pattern: "{prefix}/{item-id}-{item-slug}"
+    baseBranch: "main"
+    
+  commitStrategy:
+    prefix: "[AUTO-VALUE]"
+    includeMetrics: true
+    
+  prStrategy:
+    assignCodeOwners: true
+    autoLabels: 
+      - "autonomous"
+      - "value-driven"
+    reviewerCount: 1
+
+monitoring:
+  valueMetrics:
+    trackDeliveredValue: true
+    trackCycleTime: true
+    trackTechnicalDebtReduction: true
+    trackSecurityPostureImprovement: true
+    
+  qualityMetrics:
+    trackCodeComplexity: true
+    trackTestCoverage: true  
+    trackDependencyFreshness: true
+    trackDocumentationCoverage: true
+
+  alerts:
+    securityVulnerabilities: "immediate"
+    testFailures: "immediate"
+    performanceRegressions: "daily"
+    technicalDebtThreshold: "weekly"
+
+# Advanced settings for MATURING repositories
+advanced:
+  architecturalAnalysis:
+    enabled: true
+    hotspotDetection: true
+    complexityThresholds:
+      cyclomaticComplexity: 10
+      cognitiveComplexity: 15
+      
+  securityPosture:
+    enabled: true
+    sbomGeneration: true
+    dependencyAudit: true
+    secretsScanning: true
+    
+  operationalExcellence:
+    enabled: true
+    performanceMonitoring: true
+    resourceOptimization: true
+    capacityPlanning: true
+    
+  developerExperience:
+    enabled: true
+    setupTimeTracking: true
+    debuggingSupport: true
+    developmentMetrics: true
