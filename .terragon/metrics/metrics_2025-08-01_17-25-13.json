@@ -1,0 +1,42 @@
+{
+  "timestamp": "2025-08-01T17:25:08.613576",
+  "repository": {
+    "python_files": 11,
+    "lines_of_code": 2056,
+    "maturity_level": "maturing",
+    "primary_language": "python"
+  },
+  "code_quality": {
+    "lint_issues": "tool_not_available",
+    "type_errors": "tool_not_available",
+    "average_cyclomatic_complexity": "tool_not_available"
+  },
+  "security": {
+    "security_issues": "tool_not_available",
+    "vulnerable_dependencies": "tool_not_available"
+  },
+  "performance": {
+    "performance_test_files": 0,
+    "performance_monitoring_usage": 1
+  },
+  "technical_debt": {
+    "total_debt_comments": 0,
+    "files_with_debt": 0,
+    "deprecated_usage_count": 0
+  },
+  "testing": {
+    "test_coverage_percentage": "tool_not_available",
+    "test_files": 3,
+    "test_functions": 42
+  },
+  "dependencies": {
+    "total_dependencies": 21,
+    "outdated_dependencies": 16
+  },
+  "git_activity": {
+    "commits_last_30_days": 6,
+    "remote_branches": 4,
+    "active_contributors_last_30_days": 1
+  },
+  "maturity_score": 30.0
+}
