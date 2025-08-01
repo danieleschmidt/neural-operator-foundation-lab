@@ -121,7 +121,23 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=neural_operator_lab --cov-report=term-missing --cov-report=html"
+addopts = "--cov=neural_operator_lab --cov-report=term-missing --cov-report=html --strict-markers"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests", 
+    "end_to_end: End-to-end tests",
+    "performance: Performance tests",
+    "slow: Slow running tests",
+    "gpu: Tests requiring GPU",
+    "security: Security-related tests",
+]
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+minversion = "7.0"
+testmon_datafile = ".testmondata"
 
 [tool.coverage.run]
 source = ["src/neural_operator_lab"]
