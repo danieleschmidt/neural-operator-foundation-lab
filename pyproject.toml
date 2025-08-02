@@ -39,11 +39,34 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-benchmark>=4.0.0",
     "black>=23.0.0",
     "isort>=5.12.0",
-    "flake8>=6.0.0",
+    "ruff>=0.1.0",
     "mypy>=1.0.0",
     "pre-commit>=3.0.0",
+    "bandit[toml]>=1.7.0",
+    "safety>=2.3.0",
+    "pydocstyle>=6.3.0",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-benchmark>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "hypothesis>=6.70.0",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "myst-parser>=1.0.0",
+    "sphinx-autodoc-typehints>=1.22.0",
+    "nbsphinx>=0.9.0",
+]
+all = [
+    "neural-operator-foundation-lab[dev,test,docs,jax,viz]",
 ]
 jax = [
     "jax>=0.4.0",
@@ -98,7 +121,23 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=neural_operator_lab --cov-report=term-missing --cov-report=html"
+addopts = "--cov=neural_operator_lab --cov-report=term-missing --cov-report=html --strict-markers"
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests", 
+    "end_to_end: End-to-end tests",
+    "performance: Performance tests",
+    "slow: Slow running tests",
+    "gpu: Tests requiring GPU",
+    "security: Security-related tests",
+]
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+minversion = "7.0"
+testmon_datafile = ".testmondata"
 
 [tool.coverage.run]
 source = ["src/neural_operator_lab"]
@@ -112,3 +151,79 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
+
+# Ruff configuration
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+    "ARG001", # unused-function-argument
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "Q", # flake8-quotes
+    "PLE", # pylint errors
+    "PLR", # pylint refactor
+    "PLW", # pylint warnings
+]
+ignore = [
+    "E501",   # line too long, handled by black
+    "B008",   # do not perform function calls in argument defaults
+    "C901",   # too complex
+    "PLR0913", # too many arguments
+    "PLR0915", # too many statements
+]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "data",
+    "models",
+    "checkpoints",
+    "logs",
+    "wandb",
+    "mlruns",
+]
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["ARG001", "S101", "PLR2004"]
+"__init__.py" = ["F401"]
+
+[tool.ruff.isort]
+known-first-party = ["neural_operator_lab"]
+force-single-line = false
+
+# Bandit security configuration
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist"]
+tests = ["B201", "B301", "B302", "B306", "B307", "B313", "B314", "B315", "B316", "B317", "B318", "B319", "B320", "B325", "B601", "B602", "B604", "B605", "B606", "B607", "B608", "B609", "B610", "B611", "B701", "B702", "B703"]
+skips = ["B101", "B601"]
+
+# Pydocstyle configuration
+[tool.pydocstyle]
+convention = "google"
+add-ignore = ["D100", "D104", "D105", "D107"]
+match-dir = "(?!tests).*"

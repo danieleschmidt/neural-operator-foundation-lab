@@ -1,0 +1,180 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or enhancement for Neural Operator Foundation Lab
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested already
+          required: true
+        - label: I have checked the roadmap and documentation
+          required: true
+        - label: This feature aligns with the project's goals and scope
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: Briefly describe the feature...
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation and Use Case
+      description: Why do you need this feature? What problem does it solve?
+      placeholder: |
+        I'm trying to... but I can't because...
+        This would be useful for...
+        This would improve...
+    validations:
+      required: true
+
+  - type: textarea
+    id: detailed-description
+    attributes:
+      label: Detailed Description
+      description: Provide a detailed description of how this feature should work
+      placeholder: |
+        This feature should...
+        When a user does X, the system should Y...
+        The API should look like...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-api
+    attributes:
+      label: Proposed API/Interface
+      description: If applicable, provide a proposed API or interface design
+      render: python
+      placeholder: |
+        # Proposed API design
+        from neural_operator_lab import NewFeature
+        
+        feature = NewFeature(param1=value1, param2=value2)
+        result = feature.process(data)
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        I've tried...
+        Alternative approaches could be...
+        Current workarounds include...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - "High - I need this feature to complete my work"
+        - "Medium - This would significantly improve my workflow"
+        - "Low - This would be nice to have"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: Which category does this feature belong to?
+      options:
+        - "Neural Operator Models (FNO, TNO, PNO, etc.)"
+        - "Training Infrastructure"
+        - "Data Loading and Preprocessing"
+        - "Visualization and Analysis"
+        - "Performance and Optimization"
+        - "Documentation and Examples"
+        - "API and Usability"
+        - "Testing and Quality Assurance"
+        - "Other (please specify in additional context)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - "Simple - Small addition or modification"
+        - "Medium - Requires some design and implementation work"
+        - "Complex - Major feature requiring significant development"
+        - "I'm not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: research-references
+    attributes:
+      label: Research References
+      description: If this feature is based on research, please provide relevant papers or references
+      placeholder: |
+        [Paper Title](link)
+        DOI: 10.1000/182
+        
+        Key concepts from the paper:
+        - Concept 1
+        - Concept 2
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples and Test Cases
+      description: Provide examples of how this feature would be used
+      placeholder: |
+        Example 1:
+        - Input: ...
+        - Expected output: ...
+        
+        Example 2:
+        - Use case: ...
+        - Workflow: ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any additional context, mockups, or information that might be helpful
+      placeholder: |
+        Screenshots, diagrams, or mockups...
+        Links to similar features in other libraries...
+        Any other relevant information...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to help implement this feature
+          required: false
+        - label: I would be willing to write documentation for this feature
+          required: false
+        - label: I would be willing to help with testing this feature
+          required: false

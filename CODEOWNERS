@@ -1,0 +1,41 @@
+# Global ownership - core maintainers review everything by default
+* @danieleschmidt
+
+# Documentation
+/docs/ @danieleschmidt
+/README.md @danieleschmidt
+/CONTRIBUTING.md @danieleschmidt
+/ARCHITECTURE.md @danieleschmidt
+/PROJECT_CHARTER.md @danieleschmidt
+
+# Configuration files (critical for functionality and security)
+/pyproject.toml @danieleschmidt
+/.github/ @danieleschmidt
+/Dockerfile @danieleschmidt
+/docker-compose.yml @danieleschmidt
+/.devcontainer/ @danieleschmidt
+/.pre-commit-config.yaml @danieleschmidt
+
+# Source code - core neural operator implementations
+/src/neural_operator_lab/ @danieleschmidt
+/src/neural_operator_lab/models/ @danieleschmidt
+/src/neural_operator_lab/training/ @danieleschmidt
+/src/neural_operator_lab/data/ @danieleschmidt
+
+# Tests - quality assurance
+/tests/ @danieleschmidt
+/tests/unit/ @danieleschmidt
+/tests/integration/ @danieleschmidt
+/tests/end_to_end/ @danieleschmidt
+/tests/performance/ @danieleschmidt
+
+# Build and deployment
+/scripts/ @danieleschmidt
+/Makefile @danieleschmidt
+
+# Security-sensitive files
+/SECURITY.md @danieleschmidt
+/.secrets.baseline @danieleschmidt
+
+# Examples and tutorials
+/examples/ @danieleschmidt
