@@ -413,9 +413,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ```bibtex
 @software{neural_operator_foundation_lab,
   title={Neural Operator Foundation Lab: A Comprehensive Framework for Learning PDEs},
-  author={Your Name},
+  author={Daniel Schmidt},
   year={2025},
-  url={https://github.com/yourusername/neural-operator-foundation-lab}
+  url={https://github.com/danieleschmidt/neural-operator-foundation-lab}
 }
 ```
 
