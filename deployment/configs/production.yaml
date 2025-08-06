@@ -1,0 +1,85 @@
+experiment:
+  name: "neural_operator_production"
+  description: "Production deployment with optimized settings"
+  tags: ["production", "gpu", "distributed"]
+  seed: 42
+  log_level: "INFO"
+  output_dir: "/app/outputs"
+  checkpoint_dir: "/app/checkpoints"
+  log_dir: "/app/logs"
+
+training:
+  epochs: 200
+  batch_size: 64
+  learning_rate: 0.0005
+  weight_decay: 0.00001
+  optimizer: "adamw"
+  scheduler: "cosine"
+  warmup_steps: 2000
+  loss_function: "mse"
+  physics_loss_weight: 0.1
+  conservation_loss_weight: 0.05
+  val_frequency: 1
+  save_frequency: 5
+  early_stopping_patience: 30
+  mixed_precision: true
+  gradient_clipping: 1.0
+  gradient_accumulation_steps: 2
+  save_best_only: true
+  monitor_metric: "val_loss"
+  monitor_mode: "min"
+
+model:
+  model_type: "transformer_neural_operator"
+  input_dim: 3
+  output_dim: 1
+  hidden_dim: 512
+  num_layers: 12
+  num_heads: 16
+  dropout: 0.1
+  modes: [64, 64]
+  spectral_layers: 8
+  activation: "gelu"
+  normalization: "layer_norm"
+  use_positional_encoding: true
+  use_physics_embedding: true
+  use_adaptive_activation: true
+
+data:
+  train_data_path: "/app/data/train"
+  val_data_path: "/app/data/val"
+  test_data_path: "/app/data/test"
+  data_format: "h5"
+  variables: ["u", "v", "p", "temperature"]
+  resolution: [128, 128]
+  normalize: true
+  augmentation: true
+  augmentation_config:
+    physics_aware: true
+    rotation: true
+    reflection: true
+    gaussian_noise: 0.005
+    spatial_scaling: true
+    time_reversal: false
+  num_workers: 8
+  prefetch_factor: 4
+  pin_memory: true
+  persistent_workers: true
+  cache_data: true
+  streaming: false
+  max_cache_size: "8GB"
+
+distributed:
+  enabled: true
+  backend: "nccl"
+  init_method: "env://"
+  data_parallel: true
+  model_parallel: false
+  pipeline_parallel: false
+  zero_optimization: true
+  zero_stage: 2
+  cpu_offloading: false
+  activation_checkpointing: true
+  gradient_compression: true
+  bucket_size: 26214400  # 25MB
+  find_unused_parameters: false

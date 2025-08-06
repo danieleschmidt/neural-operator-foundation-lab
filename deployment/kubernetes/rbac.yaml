@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: neural-operator
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: rbac
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: neural-operator-role
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: rbac
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "services", "endpoints", "persistentvolumeclaims", "events", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: neural-operator-rolebinding
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: neural-operator
+  namespace: neural-operator
+roleRef:
+  kind: Role
+  name: neural-operator-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: neural-operator-cluster-role
+  labels:
+    app: neural-operator
+    component: rbac
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["extensions"]
+  resources: ["ingresses"]
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: neural-operator-cluster-rolebinding
+  labels:
+    app: neural-operator
+    component: rbac
+subjects:
+- kind: ServiceAccount
+  name: neural-operator
+  namespace: neural-operator
+roleRef:
+  kind: ClusterRole
+  name: neural-operator-cluster-role
+  apiGroup: rbac.authorization.k8s.io

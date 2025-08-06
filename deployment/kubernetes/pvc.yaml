@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neural-operator-data-pvc
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: storage
+    type: data
+spec:
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neural-operator-output-pvc
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: storage
+    type: output
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: fast-ssd
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: neural-operator-checkpoint-pvc
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: storage
+    type: checkpoint
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: fast-ssd

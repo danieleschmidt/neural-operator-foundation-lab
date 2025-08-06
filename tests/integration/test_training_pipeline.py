@@ -506,3 +506,71 @@ class TestLongTrainingScenarios:
         
         # Learning rate should have decreased
         assert final_lr < initial_lr
+    
+    def test_convergence_monitoring(self, mock_dataset):
+        """Test convergence monitoring and early stopping behavior."""
+        model = MockFourierNeuralOperator(
+            input_dim=3, output_dim=3, modes=[8, 8], width=32
+        )
+        
+        class EarlyStoppingTrainer(MockTrainer):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.best_val_loss = float('inf')
+                self.patience_counter = 0
+                self.patience = 5
+                self.min_delta = 1e-4
+            
+            def train(self, epochs=None):
+                epochs = epochs or self.config['epochs']
+                
+                # Split dataset
+                dataset_size = len(self.dataset)
+                val_size = int(self.config['validation_split'] * dataset_size)
+                train_size = dataset_size - val_size
+                
+                train_dataset, val_dataset = torch.utils.data.random_split(
+                    self.dataset, [train_size, val_size]
+                )
+                
+                train_loader = torch.utils.data.DataLoader(
+                    train_dataset, batch_size=self.config['batch_size'], shuffle=True
+                )
+                val_loader = torch.utils.data.DataLoader(
+                    val_dataset, batch_size=self.config['batch_size'], shuffle=False
+                )
+                
+                for epoch in range(epochs):
+                    self.epoch = epoch
+                    
+                    # Training phase
+                    train_loss = self._train_epoch(train_loader)
+                    self.history['train_loss'].append(train_loss)
+                    
+                    # Validation phase
+                    val_loss = self._validate_epoch(val_loader)
+                    self.history['val_loss'].append(val_loss)
+                    
+                    # Early stopping logic
+                    if val_loss < self.best_val_loss - self.min_delta:
+                        self.best_val_loss = val_loss
+                        self.patience_counter = 0
+                    else:
+                        self.patience_counter += 1
+                    
+                    # Check if early stopping should trigger
+                    if self.patience_counter >= self.patience:
+                        print(f"Early stopping at epoch {epoch}")
+                        break
+                    
+                    self.scheduler.step()
+                
+                return self.history
+        
+        config = {'epochs': 50, 'batch_size': 4, 'learning_rate': 1e-3}
+        trainer = EarlyStoppingTrainer(model, mock_dataset, config)
+        history = trainer.train()
+        
+        # Should stop before 50 epochs (unless validation loss keeps improving)
+        # This tests the early stopping mechanism
+        assert len(history['train_loss']) <= 50

@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neural-operator-config
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: config
+data:
+  kubernetes.yaml: |
+    experiment:
+      name: "neural_operator_k8s_production"
+      description: "Production deployment on Kubernetes"
+      tags: ["production", "kubernetes", "gpu"]
+      seed: 42
+      log_level: "INFO"
+      output_dir: "/app/outputs"
+      checkpoint_dir: "/app/checkpoints"
+      log_dir: "/app/logs"
+
+    training:
+      epochs: 100
+      batch_size: 32
+      learning_rate: 0.0001
+      weight_decay: 0.00001
+      optimizer: "adamw"
+      scheduler: "cosine"
+      warmup_steps: 1000
+      loss_function: "mse"
+      physics_loss_weight: 0.1
+      conservation_loss_weight: 0.05
+      val_frequency: 1
+      save_frequency: 10
+      early_stopping_patience: 20
+      mixed_precision: true
+      gradient_clipping: 1.0
+      gradient_accumulation_steps: 1
+      save_best_only: true
+      monitor_metric: "val_loss"
+      monitor_mode: "min"
+
+    model:
+      model_type: "transformer_neural_operator"
+      input_dim: 3
+      output_dim: 1
+      hidden_dim: 256
+      num_layers: 6
+      num_heads: 8
+      dropout: 0.1
+      modes: [32, 32]
+      spectral_layers: 4
+      activation: "gelu"
+      normalization: "layer_norm"
+      use_positional_encoding: true
+      use_physics_embedding: true
+      use_adaptive_activation: false
+
+    data:
+      train_data_path: "/app/data/train"
+      val_data_path: "/app/data/val"
+      test_data_path: "/app/data/test"
+      data_format: "h5"
+      variables: ["u", "v", "p"]
+      resolution: [64, 64]
+      normalize: true
+      augmentation: true
+      augmentation_config:
+        physics_aware: true
+        rotation: true
+        reflection: true
+        gaussian_noise: 0.01
+        spatial_scaling: true
+      num_workers: 4
+      prefetch_factor: 2
+      pin_memory: true
+      persistent_workers: true
+      cache_data: false
+      streaming: false
+      max_cache_size: "1GB"
+
+    distributed:
+      enabled: false
+      backend: "nccl"
+      init_method: "env://"
+      data_parallel: true
+      model_parallel: false
+      pipeline_parallel: false
+      zero_optimization: false
+      zero_stage: 2
+      cpu_offloading: false
+      activation_checkpointing: true
+      gradient_compression: false
+      bucket_size: 26214400  # 25MB
+      find_unused_parameters: true
+
+  logging.conf: |
+    version: 1
+    disable_existing_loggers: false
+    
+    formatters:
+      standard:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        datefmt: "%Y-%m-%d %H:%M:%S"
+      detailed:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s"
+        datefmt: "%Y-%m-%d %H:%M:%S"
+    
+    handlers:
+      console:
+        class: logging.StreamHandler
+        level: INFO
+        formatter: standard
+        stream: ext://sys.stdout
+      file:
+        class: logging.handlers.RotatingFileHandler
+        level: DEBUG
+        formatter: detailed
+        filename: /app/logs/neural_operator.log
+        maxBytes: 10485760  # 10MB
+        backupCount: 5
+        encoding: utf8
+    
+    loggers:
+      neural_operator_lab:
+        level: DEBUG
+        handlers: [console, file]
+        propagate: false
+    
+    root:
+      level: INFO
+      handlers: [console, file]
