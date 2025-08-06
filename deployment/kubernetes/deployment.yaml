@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neural-operator-training
+  namespace: neural-operator
+  labels:
+    app: neural-operator
+    component: training
+    version: "1.0.0"
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: neural-operator
+      component: training
+  template:
+    metadata:
+      labels:
+        app: neural-operator
+        component: training
+        version: "1.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: neural-operator
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+      - name: init-permissions
+        image: busybox:1.35
+        command: ['sh', '-c', 'chmod -R 755 /app/data && chmod -R 755 /app/outputs']
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        - name: output-volume
+          mountPath: /app/outputs
+        securityContext:
+          runAsUser: 0
+      containers:
+      - name: neural-operator
+        image: neural-operator-lab:1.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: NEURAL_OP_CONFIG_PATH
+          value: "/app/configs/kubernetes.yaml"
+        - name: NEURAL_OP_LOG_LEVEL
+          value: "INFO"
+        - name: NEURAL_OP_SECURE_MODE
+          value: "true"
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        - name: NCCL_DEBUG
+          value: "INFO"
+        - name: OMP_NUM_THREADS
+          value: "4"
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        - name: metrics
+          containerPort: 8080
+          protocol: TCP
+        - name: distributed
+          containerPort: 29500
+          protocol: TCP
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+            nvidia.com/gpu: "1"
+          limits:
+            memory: "16Gi"
+            cpu: "8"
+            nvidia.com/gpu: "1"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/configs
+          readOnly: true
+        - name: data-volume
+          mountPath: /app/data
+          readOnly: true
+        - name: output-volume
+          mountPath: /app/outputs
+        - name: checkpoint-volume
+          mountPath: /app/checkpoints
+        - name: log-volume
+          mountPath: /app/logs
+        - name: tmp-volume
+          mountPath: /tmp
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      volumes:
+      - name: config-volume
+        configMap:
+          name: neural-operator-config
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: neural-operator-data-pvc
+      - name: output-volume
+        persistentVolumeClaim:
+          claimName: neural-operator-output-pvc
+      - name: checkpoint-volume
+        persistentVolumeClaim:
+          claimName: neural-operator-checkpoint-pvc
+      - name: log-volume
+        emptyDir: {}
+      - name: tmp-volume
+        emptyDir: {}
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Exists"
+        effect: "NoSchedule"
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        nvidia.com/gpu.present: "true"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/worker
+                operator: Exists

@@ -1,0 +1,74 @@
+# CPU-only Dockerfile for Neural Operator Foundation Lab
+FROM ubuntu:22.04
+
+LABEL maintainer="Terragon Labs <info@terragonlabs.com>"
+LABEL version="1.0.0"
+LABEL description="Neural Operator Foundation Lab - CPU Only Container"
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Create non-root user
+RUN groupadd --gid 1000 neural_op && \
+    useradd --uid 1000 --gid neural_op --shell /bin/bash --create-home neural_op
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    curl \
+    libhdf5-dev \
+    libopenmpi-dev \
+    openmpi-bin \
+    libblas-dev \
+    liblapack-dev \
+    gfortran \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up Python environment
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
+# Create application directory
+WORKDIR /app
+
+# Copy requirements
+COPY requirements.txt requirements-cpu.txt ./
+
+# Install CPU-specific PyTorch and dependencies
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+    pip3 install -r requirements.txt && \
+    pip3 install -r requirements-cpu.txt && \
+    pip3 cache purge
+
+# Copy application code
+COPY . .
+
+# Install the package
+RUN pip3 install -e .
+
+# Create necessary directories
+RUN mkdir -p /app/data /app/logs /app/outputs /app/checkpoints /app/configs && \
+    chown -R neural_op:neural_op /app
+
+# Switch to non-root user
+USER neural_op
+
+# Set up configuration
+COPY deployment/configs/cpu.yaml /app/configs/cpu.yaml
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD python3 -c "import neural_operator_lab; print('OK')" || exit 1
+
+# Default command
+CMD ["python3", "-m", "neural_operator_lab.cli.main", "--config", "/app/configs/cpu.yaml"]

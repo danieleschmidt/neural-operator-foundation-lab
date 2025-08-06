@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  neural-operator-gpu:
+    build:
+      context: ../../
+      dockerfile: deployment/docker/Dockerfile
+    container_name: neural_operator_gpu
+    restart: unless-stopped
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NEURAL_OP_CONFIG_PATH=/app/configs/production.yaml
+      - NEURAL_OP_LOG_LEVEL=INFO
+      - NEURAL_OP_SECURE_MODE=true
+    volumes:
+      - ../../data:/app/data:ro
+      - ../../configs:/app/configs:ro
+      - neural_op_outputs:/app/outputs
+      - neural_op_logs:/app/logs
+      - neural_op_checkpoints:/app/checkpoints
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    networks:
+      - neural_op_network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import neural_operator_lab; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  neural-operator-cpu:
+    build:
+      context: ../../
+      dockerfile: deployment/docker/Dockerfile.cpu
+    container_name: neural_operator_cpu
+    restart: unless-stopped
+    environment:
+      - NEURAL_OP_CONFIG_PATH=/app/configs/cpu.yaml
+      - NEURAL_OP_LOG_LEVEL=INFO
+      - NEURAL_OP_SECURE_MODE=true
+    volumes:
+      - ../../data:/app/data:ro
+      - ../../configs:/app/configs:ro
+      - neural_op_outputs_cpu:/app/outputs
+      - neural_op_logs_cpu:/app/logs
+      - neural_op_checkpoints_cpu:/app/checkpoints
+    ports:
+      - "8001:8000"
+    networks:
+      - neural_op_network
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import neural_operator_lab; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: neural_op_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - neural_op_redis_data:/data
+    networks:
+      - neural_op_network
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: neural_op_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: neural_operator
+      POSTGRES_USER: neural_op_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-neural_op_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - neural_op_postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - neural_op_network
+
+  monitoring:
+    image: prom/prometheus:latest
+    container_name: neural_op_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - neural_op_prometheus_data:/prometheus
+    networks:
+      - neural_op_network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: neural_op_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - neural_op_grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    networks:
+      - neural_op_network
+
+volumes:
+  neural_op_outputs:
+  neural_op_logs:
+  neural_op_checkpoints:
+  neural_op_outputs_cpu:
+  neural_op_logs_cpu:
+  neural_op_checkpoints_cpu:
+  neural_op_redis_data:
+  neural_op_postgres_data:
+  neural_op_prometheus_data:
+  neural_op_grafana_data:
+
+networks:
+  neural_op_network:
+    driver: bridge
