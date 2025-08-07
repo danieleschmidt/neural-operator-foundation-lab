@@ -2,11 +2,17 @@
 
 import os
 import json
-import yaml
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
 import logging
+
+# Optional yaml import
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
 
 
 @dataclass
@@ -238,6 +244,8 @@ class Config:
             with open(path, 'w') as f:
                 json.dump(config_dict, f, indent=2)
         elif path.suffix.lower() in ['.yaml', '.yml']:
+            if not HAS_YAML:
+                raise ImportError("PyYAML is required for YAML config files. Install with: pip install PyYAML")
             with open(path, 'w') as f:
                 yaml.dump(config_dict, f, default_flow_style=False, indent=2)
         else:
@@ -255,6 +263,8 @@ class Config:
             with open(path, 'r') as f:
                 config_dict = json.load(f)
         elif path.suffix.lower() in ['.yaml', '.yml']:
+            if not HAS_YAML:
+                raise ImportError("PyYAML is required for YAML config files. Install with: pip install PyYAML")
             with open(path, 'r') as f:
                 config_dict = yaml.safe_load(f)
         else:
