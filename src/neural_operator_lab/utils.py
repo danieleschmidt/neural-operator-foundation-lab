@@ -9,6 +9,8 @@ from typing import Dict, List, Tuple, Optional, Union, Any
 import time
 from contextlib import contextmanager
 import logging
+import warnings
+import sys
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -317,15 +319,36 @@ class PerformanceProfiler:
 
 
 def setup_device(device: Optional[str] = None) -> torch.device:
-    """Setup computation device."""
-    if device is None:
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    """Setup computation device with validation and fallback."""
+    if device is None or device == 'auto':
+        if torch.cuda.is_available():
+            device = 'cuda'
+        elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+            device = 'mps'
+        else:
+            device = 'cpu'
     
-    device = torch.device(device)
+    try:
+        device = torch.device(device)
+        
+        # Validate device availability
+        if device.type == 'cuda' and not torch.cuda.is_available():
+            warnings.warn("CUDA requested but not available, falling back to CPU")
+            device = torch.device('cpu')
+        elif device.type == 'mps' and not (hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()):
+            warnings.warn("MPS requested but not available, falling back to CPU")
+            device = torch.device('cpu')
+    except Exception as e:
+        logger.error(f"Error setting up device {device}: {e}")
+        device = torch.device('cpu')
+        logger.info("Falling back to CPU")
     
+    # Log device information
     if device.type == 'cuda':
         logger.info(f"Using GPU: {torch.cuda.get_device_name()}")
         logger.info(f"GPU Memory: {torch.cuda.get_device_properties(device).total_memory / 1e9:.1f} GB")
+    elif device.type == 'mps':
+        logger.info("Using Apple Metal Performance Shaders (MPS)")
     else:
         logger.info("Using CPU")
     
@@ -391,20 +414,188 @@ def parse_size_string(size_str: str) -> int:
 
 def compute_spectral_metrics(pred: torch.Tensor, target: torch.Tensor) -> Dict[str, float]:
     """Compute spectral domain metrics."""
-    # FFT of predictions and targets
-    pred_fft = torch.fft.fftn(pred, dim=(-2, -1))
-    target_fft = torch.fft.fftn(target, dim=(-2, -1))
+    try:
+        # FFT of predictions and targets
+        pred_fft = torch.fft.fftn(pred, dim=(-2, -1))
+        target_fft = torch.fft.fftn(target, dim=(-2, -1))
+        
+        # Power spectral density
+        pred_psd = torch.abs(pred_fft)**2
+        target_psd = torch.abs(target_fft)**2
+        
+        # Spectral error
+        spectral_error = torch.mean((pred_psd - target_psd)**2) / (torch.mean(target_psd**2) + 1e-8)
+        
+        # Correlation (with error handling)
+        pred_flat = pred_psd.flatten()
+        target_flat = target_psd.flatten()
+        
+        if len(pred_flat) > 1 and torch.var(pred_flat) > 1e-8 and torch.var(target_flat) > 1e-8:
+            correlation_matrix = torch.corrcoef(torch.stack([pred_flat, target_flat]))
+            correlation = correlation_matrix[0, 1].item()
+        else:
+            correlation = 0.0
+        
+        return {
+            'spectral_mse': spectral_error.item(),
+            'spectral_correlation': correlation
+        }
+    except Exception as e:
+        logger.warning(f"Error computing spectral metrics: {e}")
+        return {
+            'spectral_mse': float('inf'),
+            'spectral_correlation': 0.0
+        }
+
+
+def check_tensor_health(tensor: torch.Tensor, name: str = "tensor") -> bool:
+    """Check if tensor contains NaN or Inf values."""
+    try:
+        if torch.isnan(tensor).any():
+            logger.warning(f"{name} contains NaN values")
+            return False
+        
+        if torch.isinf(tensor).any():
+            logger.warning(f"{name} contains Inf values")
+            return False
+        
+        # Check for very large values that might cause overflow
+        if torch.max(torch.abs(tensor)) > 1e10:
+            logger.warning(f"{name} contains very large values (max: {torch.max(torch.abs(tensor)).item()})")
+        
+        return True
+    except Exception as e:
+        logger.error(f"Error checking tensor health for {name}: {e}")
+        return False
+
+
+def safe_normalize(tensor: torch.Tensor, dim: int = -1, eps: float = 1e-8) -> torch.Tensor:
+    """Safely normalize tensor to prevent NaN."""
+    try:
+        norm = torch.norm(tensor, dim=dim, keepdim=True)
+        return tensor / (norm + eps)
+    except Exception as e:
+        logger.error(f"Error in safe_normalize: {e}")
+        return tensor
+
+
+def configure_logging(level: str = 'INFO', log_file: Optional[str] = None):
+    """Configure logging with proper formatting and error handling."""
+    try:
+        # Set up logging level
+        log_levels = {
+            'DEBUG': logging.DEBUG,
+            'INFO': logging.INFO,
+            'WARNING': logging.WARNING,
+            'ERROR': logging.ERROR,
+            'CRITICAL': logging.CRITICAL
+        }
+        
+        level = log_levels.get(level.upper(), logging.INFO)
+        
+        # Create formatter
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        
+        # Setup handlers
+        handlers = []
+        
+        # Console handler
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        handlers.append(console_handler)
+        
+        # File handler if specified
+        if log_file:
+            try:
+                file_handler = logging.FileHandler(log_file)
+                file_handler.setFormatter(formatter)
+                handlers.append(file_handler)
+            except Exception as e:
+                print(f"Warning: Could not create file handler for {log_file}: {e}")
+        
+        # Configure root logger
+        logging.basicConfig(
+            level=level,
+            handlers=handlers,
+            force=True
+        )
+        
+        # Suppress some noisy libraries
+        logging.getLogger('matplotlib').setLevel(logging.WARNING)
+        logging.getLogger('PIL').setLevel(logging.WARNING)
+        logging.getLogger('h5py').setLevel(logging.WARNING)
+        
+    except Exception as e:
+        print(f"Error configuring logging: {e}")
+
+
+@contextmanager
+def memory_manager():
+    """Context manager for GPU memory management."""
+    if torch.cuda.is_available():
+        initial_memory = torch.cuda.memory_allocated()
+        torch.cuda.empty_cache()
+    else:
+        initial_memory = 0
     
-    # Power spectral density
-    pred_psd = torch.abs(pred_fft)**2
-    target_psd = torch.abs(target_fft)**2
+    try:
+        yield
+    finally:
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            final_memory = torch.cuda.memory_allocated()
+            if final_memory > initial_memory:
+                logger.debug(f"Memory increased by {(final_memory - initial_memory) / 1e6:.1f} MB")
+
+
+def count_parameters(model: nn.Module) -> Tuple[int, int]:
+    """Count total and trainable parameters in a model."""
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return total_params, trainable_params
+
+
+def model_summary(model: nn.Module) -> Dict[str, Any]:
+    """Get comprehensive model summary."""
+    total_params, trainable_params = count_parameters(model)
     
-    # Spectral error
-    spectral_error = torch.mean((pred_psd - target_psd)**2) / torch.mean(target_psd**2)
-    
-    return {
-        'spectral_mse': spectral_error.item(),
-        'spectral_correlation': torch.corrcoef(
-            torch.stack([pred_psd.flatten(), target_psd.flatten()])
-        )[0, 1].item()
+    summary = {
+        'total_parameters': total_params,
+        'trainable_parameters': trainable_params,
+        'model_size_mb': total_params * 4 / (1024 ** 2),  # Assuming fp32
+        'modules': len(list(model.modules())),
+        'layers': len([m for m in model.modules() if len(list(m.children())) == 0])
     }
+    
+    return summary
+
+
+def gradient_clipping(parameters, max_norm: float, norm_type: float = 2.0) -> float:
+    """Clip gradients and return the gradient norm."""
+    parameters = list(filter(lambda p: p.grad is not None, parameters))
+    
+    if len(parameters) == 0:
+        return 0.0
+    
+    try:
+        # Compute gradient norm
+        total_norm = 0.0
+        for p in parameters:
+            param_norm = p.grad.data.norm(norm_type)
+            total_norm += param_norm.item() ** norm_type
+        
+        total_norm = total_norm ** (1.0 / norm_type)
+        
+        # Clip gradients
+        clip_coef = max_norm / (total_norm + 1e-6)
+        if clip_coef < 1:
+            for p in parameters:
+                p.grad.data.mul_(clip_coef)
+        
+        return total_norm
+    except Exception as e:
+        logger.error(f"Error in gradient clipping: {e}")
+        return 0.0

@@ -10,11 +10,16 @@ import os
 from pathlib import Path
 import json
 import logging
+import warnings
+import gc
+from contextlib import contextmanager
 
 from ..base import NeuralOperatorBase, TrainingMetrics
 from ..utils import PerformanceProfiler, setup_device, compute_spectral_metrics
 from .losses import PhysicsInformedLoss, SpectralLoss, ConservationLoss
 from .callbacks import TrainingCallback, CallbackList
+from ..monitoring import ComprehensiveLogger, AdvancedErrorHandler
+from ..security import InputValidator
 
 
 @dataclass
@@ -86,8 +91,27 @@ class Trainer:
         self.config = config or TrainerConfig()
         self.device = setup_device(self.config.device)
         
-        # Setup model
-        self.model = model.to(self.device)
+        # Setup robust monitoring and error handling
+        self.logger = ComprehensiveLogger(
+            log_dir=Path(self.config.save_dir) / "logs",
+            experiment_name="neural_operator_training"
+        )
+        self.error_handler = AdvancedErrorHandler(
+            logger=self.logger,
+            max_retries=3,
+            recovery_strategies=['checkpoint_restore', 'lr_reduction', 'batch_reduction']
+        )
+        
+        # Setup security validation
+        self.input_validator = InputValidator()
+        
+        # Setup model with error handling
+        try:
+            self.model = model.to(self.device)
+            self.logger.log_info(f"Model loaded successfully on {self.device}")
+        except Exception as e:
+            self.error_handler.handle_error(e, context="model_initialization")
+            raise
         
         # Setup loss function
         if loss_fn is None:
@@ -102,6 +126,7 @@ class Trainer:
         # Mixed precision training
         if self.config.mixed_precision:
             self.scaler = torch.cuda.amp.GradScaler()
+            self.logger.log_info("Mixed precision training enabled")
         else:
             self.scaler = None
         
@@ -109,6 +134,7 @@ class Trainer:
         self.current_epoch = 0
         self.global_step = 0
         self.best_val_loss = float('inf')
+        self._training_interrupted = False
         
         # Metrics and logging
         self.metrics = TrainingMetrics()
@@ -123,6 +149,11 @@ class Trainer:
         # Gradient checkpointing
         if self.config.gradient_checkpointing:
             self._enable_gradient_checkpointing()
+            
+        # Memory optimization
+        if hasattr(torch.backends, 'cudnn') and torch.cuda.is_available():
+            torch.backends.cudnn.benchmark = True
+            torch.backends.cudnn.deterministic = False
     
     def _create_default_loss(self) -> nn.Module:
         """Create default loss function."""

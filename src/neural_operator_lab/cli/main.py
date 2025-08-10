@@ -5,9 +5,14 @@ import sys
 import logging
 from typing import List, Optional
 from pathlib import Path
+import warnings
+import traceback
+import signal
 
 from .commands import TrainCommand, EvaluateCommand, BenchmarkCommand, ConfigCommand
 from ..config import configure_security
+from ..monitoring import ComprehensiveLogger, AdvancedErrorHandler
+from ..security import SecurityConfig
 
 
 def create_parser() -> argparse.ArgumentParser:
