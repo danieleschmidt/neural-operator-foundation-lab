@@ -18,7 +18,7 @@ from ..base import NeuralOperatorBase, TrainingMetrics
 from ..utils import PerformanceProfiler, setup_device, compute_spectral_metrics
 from .losses import PhysicsInformedLoss, SpectralLoss, ConservationLoss
 from .callbacks import TrainingCallback, CallbackList
-from ..monitoring import ComprehensiveLogger, AdvancedErrorHandler
+from ..monitoring import get_comprehensive_logger, get_advanced_error_handler
 from ..security import InputValidator
 
 
