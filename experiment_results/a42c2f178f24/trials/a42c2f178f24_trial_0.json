@@ -1,0 +1,28 @@
+{
+  "trial_id": "a42c2f178f24_trial_0",
+  "parameters": {
+    "x": -5.0,
+    "y": -5.0
+  },
+  "result": {
+    "experiment_id": "a42c2f178f24_trial_0",
+    "name": "quadratic",
+    "parameters": {
+      "x": -5.0,
+      "y": -5.0
+    },
+    "metrics": {
+      "loss": 113.0,
+      "x_squared": 25.0,
+      "y_squared": 25.0
+    },
+    "metadata": {},
+    "timestamp": 1755113382.356121,
+    "duration": 0.010213851928710938,
+    "success": true,
+    "error_message": null
+  },
+  "start_time": 1755113382.3458786,
+  "end_time": 1755113382.3560925,
+  "status": "completed"
+}

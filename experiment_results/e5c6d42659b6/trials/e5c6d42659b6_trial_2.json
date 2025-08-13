@@ -1,0 +1,26 @@
+{
+  "trial_id": "e5c6d42659b6_trial_2",
+  "parameters": {
+    "param_a": -3.0,
+    "param_b": -1.6666666666666667
+  },
+  "result": {
+    "experiment_id": "e5c6d42659b6_trial_2",
+    "name": "integration_optimization",
+    "parameters": {
+      "param_a": -3.0,
+      "param_b": -1.6666666666666667
+    },
+    "metrics": {
+      "integration_optimization": 11.777777777777779
+    },
+    "metadata": {},
+    "timestamp": 1755113355.8534966,
+    "duration": 3.814697265625e-06,
+    "success": true,
+    "error_message": null
+  },
+  "start_time": 1755113355.8534882,
+  "end_time": 1755113355.853492,
+  "status": "completed"
+}

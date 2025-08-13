@@ -1,0 +1,382 @@
+{
+  "experiment_id": "e624941183b6",
+  "config": {
+    "name": "quadratic",
+    "description": "Optimize quadratic function",
+    "parameters": {},
+    "fixed_params": {},
+    "search_space": {
+      "x": {
+        "type": "uniform",
+        "low": -5,
+        "high": 5
+      },
+      "y": {
+        "type": "uniform",
+        "low": -5,
+        "high": 5
+      }
+    },
+    "optimization_metric": "loss",
+    "optimization_direction": "minimize",
+    "max_trials": 10,
+    "max_duration": null,
+    "early_stopping_patience": 10,
+    "random_seed": 42,
+    "parallel_trials": 1,
+    "save_intermediate": true
+  },
+  "trials": [
+    {
+      "trial_id": "e624941183b6_trial_0",
+      "parameters": {
+        "x": -5.0,
+        "y": -5.0
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_0",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": -5.0
+        },
+        "metrics": {
+          "loss": 113.0,
+          "x_squared": 25.0,
+          "y_squared": 25.0
+        },
+        "metadata": {},
+        "timestamp": 1755113190.7541232,
+        "duration": 0.010233879089355469,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.7438595,
+      "end_time": 1755113190.7540934,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_1",
+      "parameters": {
+        "x": -5.0,
+        "y": -3.888888888888889
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_1",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": -3.888888888888889
+        },
+        "metrics": {
+          "loss": 96.4567901234568,
+          "x_squared": 25.0,
+          "y_squared": 15.123456790123456
+        },
+        "metadata": {},
+        "timestamp": 1755113190.7651932,
+        "duration": 0.010195493698120117,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.7549698,
+      "end_time": 1755113190.7651653,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_2",
+      "parameters": {
+        "x": -5.0,
+        "y": -2.7777777777777777
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_2",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": -2.7777777777777777
+        },
+        "metrics": {
+          "loss": 82.38271604938271,
+          "x_squared": 25.0,
+          "y_squared": 7.716049382716049
+        },
+        "metadata": {},
+        "timestamp": 1755113190.7760613,
+        "duration": 0.010165929794311523,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.7658725,
+      "end_time": 1755113190.7760384,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_3",
+      "parameters": {
+        "x": -5.0,
+        "y": -1.6666666666666665
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_3",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": -1.6666666666666665
+        },
+        "metrics": {
+          "loss": 70.77777777777777,
+          "x_squared": 25.0,
+          "y_squared": 2.7777777777777772
+        },
+        "metadata": {},
+        "timestamp": 1755113190.7869537,
+        "duration": 0.010174751281738281,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.7767565,
+      "end_time": 1755113190.7869313,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_4",
+      "parameters": {
+        "x": -5.0,
+        "y": -0.5555555555555554
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_4",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": -0.5555555555555554
+        },
+        "metrics": {
+          "loss": 61.641975308641975,
+          "x_squared": 25.0,
+          "y_squared": 0.30864197530864174
+        },
+        "metadata": {},
+        "timestamp": 1755113190.7977488,
+        "duration": 0.010162591934204102,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.7875633,
+      "end_time": 1755113190.797726,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_5",
+      "parameters": {
+        "x": -5.0,
+        "y": 0.5555555555555554
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_5",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": 0.5555555555555554
+        },
+        "metrics": {
+          "loss": 54.97530864197531,
+          "x_squared": 25.0,
+          "y_squared": 0.30864197530864174
+        },
+        "metadata": {},
+        "timestamp": 1755113190.8088007,
+        "duration": 0.010164737701416016,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.7986119,
+      "end_time": 1755113190.8087766,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_6",
+      "parameters": {
+        "x": -5.0,
+        "y": 1.666666666666667
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_6",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": 1.666666666666667
+        },
+        "metrics": {
+          "loss": 50.77777777777778,
+          "x_squared": 25.0,
+          "y_squared": 2.7777777777777786
+        },
+        "metadata": {},
+        "timestamp": 1755113190.8197842,
+        "duration": 0.010249853134155273,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.8094974,
+      "end_time": 1755113190.8197472,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_7",
+      "parameters": {
+        "x": -5.0,
+        "y": 2.7777777777777786
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_7",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": 2.7777777777777786
+        },
+        "metrics": {
+          "loss": 49.04938271604938,
+          "x_squared": 25.0,
+          "y_squared": 7.7160493827160535
+        },
+        "metadata": {},
+        "timestamp": 1755113190.8308225,
+        "duration": 0.01018834114074707,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.820601,
+      "end_time": 1755113190.8307893,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_8",
+      "parameters": {
+        "x": -5.0,
+        "y": 3.8888888888888893
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_8",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": 3.8888888888888893
+        },
+        "metrics": {
+          "loss": 49.79012345679013,
+          "x_squared": 25.0,
+          "y_squared": 15.12345679012346
+        },
+        "metadata": {},
+        "timestamp": 1755113190.8420048,
+        "duration": 0.010178804397583008,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.831802,
+      "end_time": 1755113190.8419807,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e624941183b6_trial_9",
+      "parameters": {
+        "x": -5.0,
+        "y": 5.0
+      },
+      "result": {
+        "experiment_id": "e624941183b6_trial_9",
+        "name": "quadratic",
+        "parameters": {
+          "x": -5.0,
+          "y": 5.0
+        },
+        "metrics": {
+          "loss": 53.0,
+          "x_squared": 25.0,
+          "y_squared": 25.0
+        },
+        "metadata": {},
+        "timestamp": 1755113190.8528912,
+        "duration": 0.010206460952758789,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113190.8426595,
+      "end_time": 1755113190.852866,
+      "status": "completed"
+    }
+  ],
+  "analysis": {
+    "total_trials": 10,
+    "successful_trials": 10,
+    "failed_trials": 0,
+    "total_duration": 0.10192084312438965,
+    "metrics_analysis": {
+      "y_squared": {
+        "count": 10,
+        "mean": 10.185185185185185,
+        "median": 7.716049382716051,
+        "mode": 25.0,
+        "std": 9.456070200062598,
+        "variance": 89.41726362851192,
+        "min": 0.30864197530864174,
+        "max": 25.0,
+        "range": 24.691358024691358,
+        "q1": 2.7777777777777772,
+        "q3": 15.12345679012346,
+        "p95": 25.0,
+        "p99": 25.0,
+        "skewness": 0.4700096710803843,
+        "kurtosis": -1.4659090909090908
+      },
+      "loss": {
+        "count": 10,
+        "mean": 68.18518518518519,
+        "median": 58.308641975308646,
+        "mode": 113.0,
+        "std": 22.28956417330584,
+        "variance": 496.8246710359193,
+        "min": 49.04938271604938,
+        "max": 113.0,
+        "range": 63.95061728395062,
+        "q1": 50.77777777777778,
+        "q3": 82.38271604938271,
+        "p95": 113.0,
+        "p99": 113.0,
+        "skewness": 0.8207299677823201,
+        "kurtosis": -0.9180677331224794
+      },
+      "x_squared": {
+        "count": 10,
+        "mean": 25.0,
+        "median": 25.0,
+        "mode": 25.0,
+        "std": 0.0,
+        "variance": 0.0,
+        "min": 25.0,
+        "max": 25.0,
+        "range": 0.0,
+        "q1": 25.0,
+        "q3": 25.0,
+        "p95": 25.0,
+        "p99": 25.0
+      }
+    },
+    "best_trial": {
+      "trial_id": "e624941183b6_trial_7",
+      "parameters": {
+        "x": -5.0,
+        "y": 2.7777777777777786
+      },
+      "metrics": {
+        "loss": 49.04938271604938,
+        "x_squared": 25.0,
+        "y_squared": 7.7160493827160535
+      },
+      "metric_value": 49.04938271604938
+    }
+  },
+  "end_time": 1755113190.854647
+}

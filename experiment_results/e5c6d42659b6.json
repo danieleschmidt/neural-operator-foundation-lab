@@ -1,0 +1,198 @@
+{
+  "experiment_id": "e5c6d42659b6",
+  "config": {
+    "name": "integration_optimization",
+    "description": "",
+    "parameters": {},
+    "fixed_params": {},
+    "search_space": {
+      "param_a": {
+        "type": "uniform",
+        "low": -3,
+        "high": 3
+      },
+      "param_b": {
+        "type": "uniform",
+        "low": -3,
+        "high": 3
+      }
+    },
+    "optimization_metric": "integration_optimization",
+    "optimization_direction": "minimize",
+    "max_trials": 5,
+    "max_duration": null,
+    "early_stopping_patience": 10,
+    "random_seed": 42,
+    "parallel_trials": 1,
+    "save_intermediate": true
+  },
+  "trials": [
+    {
+      "trial_id": "e5c6d42659b6_trial_0",
+      "parameters": {
+        "param_a": -3.0,
+        "param_b": -3.0
+      },
+      "result": {
+        "experiment_id": "e5c6d42659b6_trial_0",
+        "name": "integration_optimization",
+        "parameters": {
+          "param_a": -3.0,
+          "param_b": -3.0
+        },
+        "metrics": {
+          "integration_optimization": 18.0
+        },
+        "metadata": {},
+        "timestamp": 1755113355.852504,
+        "duration": 5.245208740234375e-06,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113355.8524902,
+      "end_time": 1755113355.8524954,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e5c6d42659b6_trial_1",
+      "parameters": {
+        "param_a": -3.0,
+        "param_b": -2.3333333333333335
+      },
+      "result": {
+        "experiment_id": "e5c6d42659b6_trial_1",
+        "name": "integration_optimization",
+        "parameters": {
+          "param_a": -3.0,
+          "param_b": -2.3333333333333335
+        },
+        "metrics": {
+          "integration_optimization": 14.444444444444446
+        },
+        "metadata": {},
+        "timestamp": 1755113355.8531342,
+        "duration": 4.291534423828125e-06,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113355.8531237,
+      "end_time": 1755113355.853128,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e5c6d42659b6_trial_2",
+      "parameters": {
+        "param_a": -3.0,
+        "param_b": -1.6666666666666667
+      },
+      "result": {
+        "experiment_id": "e5c6d42659b6_trial_2",
+        "name": "integration_optimization",
+        "parameters": {
+          "param_a": -3.0,
+          "param_b": -1.6666666666666667
+        },
+        "metrics": {
+          "integration_optimization": 11.777777777777779
+        },
+        "metadata": {},
+        "timestamp": 1755113355.8534966,
+        "duration": 3.814697265625e-06,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113355.8534882,
+      "end_time": 1755113355.853492,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e5c6d42659b6_trial_3",
+      "parameters": {
+        "param_a": -3.0,
+        "param_b": -1.0
+      },
+      "result": {
+        "experiment_id": "e5c6d42659b6_trial_3",
+        "name": "integration_optimization",
+        "parameters": {
+          "param_a": -3.0,
+          "param_b": -1.0
+        },
+        "metrics": {
+          "integration_optimization": 10.0
+        },
+        "metadata": {},
+        "timestamp": 1755113355.8537385,
+        "duration": 2.1457672119140625e-06,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113355.8537335,
+      "end_time": 1755113355.8537357,
+      "status": "completed"
+    },
+    {
+      "trial_id": "e5c6d42659b6_trial_4",
+      "parameters": {
+        "param_a": -3.0,
+        "param_b": -0.3333333333333335
+      },
+      "result": {
+        "experiment_id": "e5c6d42659b6_trial_4",
+        "name": "integration_optimization",
+        "parameters": {
+          "param_a": -3.0,
+          "param_b": -0.3333333333333335
+        },
+        "metrics": {
+          "integration_optimization": 9.11111111111111
+        },
+        "metadata": {},
+        "timestamp": 1755113355.853989,
+        "duration": 2.6226043701171875e-06,
+        "success": true,
+        "error_message": null
+      },
+      "start_time": 1755113355.8539827,
+      "end_time": 1755113355.8539853,
+      "status": "completed"
+    }
+  ],
+  "analysis": {
+    "total_trials": 5,
+    "successful_trials": 5,
+    "failed_trials": 0,
+    "total_duration": 1.811981201171875e-05,
+    "metrics_analysis": {
+      "integration_optimization": {
+        "count": 5,
+        "mean": 12.666666666666668,
+        "median": 11.777777777777779,
+        "mode": 18.0,
+        "std": 3.6106837353937604,
+        "variance": 13.03703703703704,
+        "min": 9.11111111111111,
+        "max": 18.0,
+        "range": 8.88888888888889,
+        "q1": 10.0,
+        "q3": 14.444444444444446,
+        "p95": 18.0,
+        "p99": 18.0,
+        "skewness": 0.39389277113386395,
+        "kurtosis": -1.7878787878787885
+      }
+    },
+    "best_trial": {
+      "trial_id": "e5c6d42659b6_trial_4",
+      "parameters": {
+        "param_a": -3.0,
+        "param_b": -0.3333333333333335
+      },
+      "metrics": {
+        "integration_optimization": 9.11111111111111
+      },
+      "metric_value": 9.11111111111111
+    }
+  },
+  "end_time": 1755113355.8546264
+}

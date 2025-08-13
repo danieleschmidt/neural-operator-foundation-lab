@@ -1,0 +1,58 @@
+{
+  "overall_status": "PASSED",
+  "overall_score": 90.0,
+  "total_duration": 5.0822694301605225,
+  "status_counts": {
+    "passed": 6,
+    "failed": 0,
+    "warning": 2,
+    "skipped": 0
+  },
+  "individual_results": {
+    "Core Functionality": {
+      "status": "passed",
+      "score": 100.0,
+      "duration": 4.970049142837524
+    },
+    "Security Framework": {
+      "status": "warning",
+      "score": 80,
+      "duration": 0.04149174690246582
+    },
+    "Performance Optimization": {
+      "status": "passed",
+      "score": 90,
+      "duration": 0.03309488296508789
+    },
+    "Research Capabilities": {
+      "status": "passed",
+      "score": 90,
+      "duration": 0.014729499816894531
+    },
+    "Code Quality": {
+      "status": "passed",
+      "score": 85,
+      "duration": 0.0020761489868164062
+    },
+    "Documentation Completeness": {
+      "status": "passed",
+      "score": 100.0,
+      "duration": 0.0006842613220214844
+    },
+    "Deployment Readiness": {
+      "status": "passed",
+      "score": 100,
+      "duration": 0.009392499923706055
+    },
+    "Compliance Standards": {
+      "status": "warning",
+      "score": 75,
+      "duration": 0.010378360748291016
+    }
+  },
+  "top_errors": [
+    "GDPR compliance module missing"
+  ],
+  "top_recommendations": [],
+  "timestamp": 1755113382.695688
+}

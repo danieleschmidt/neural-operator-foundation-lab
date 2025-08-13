@@ -9,11 +9,12 @@ from .transformer import TransformerNeuralOperator
 
 # Import foundation models if available
 try:
-    from .foundation import UniversalPhysicsTransformer
+    from .foundation import UniversalPhysicsTransformer, UniversalPhysicsConfig
     _HAS_FOUNDATION = True
 except ImportError:
     _HAS_FOUNDATION = False
     UniversalPhysicsTransformer = None
+    UniversalPhysicsConfig = None
 
 __all__ = [
     'FourierNeuralOperator',
@@ -25,4 +26,4 @@ __all__ = [
 ]
 
 if _HAS_FOUNDATION:
-    __all__.append('UniversalPhysicsTransformer')
+    __all__.extend(['UniversalPhysicsTransformer', 'UniversalPhysicsConfig'])

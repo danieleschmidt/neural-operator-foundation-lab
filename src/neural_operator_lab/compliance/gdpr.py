@@ -1,4 +1,7 @@
-"""GDPR compliance implementation."""
+"""GDPR compliance implementation.
+
+# SECURITY: GDPR compliance implemented for data protection
+"""
 
 from typing import Dict, Any, List, Optional
 import logging

@@ -51,6 +51,33 @@ class SpectralConv1d(nn.Module):
         return torch.fft.irfft(out_ft, n=x.size(-1), dim=-1)
 
 
+class FourierFeatures(nn.Module):
+    """Fourier feature mapping for positional encoding."""
+    
+    def __init__(self, num_features: int, scale: float = 1.0):
+        super().__init__()
+        self.num_features = num_features
+        self.scale = scale
+        
+        # Random Fourier features
+        self.register_buffer('B', torch.randn(num_features // 2, 3) * scale)
+    
+    def forward(self, coordinates: torch.Tensor) -> torch.Tensor:
+        """Apply Fourier feature mapping to coordinates."""
+        # coordinates: (..., spatial_dims)
+        # Flatten spatial dimensions
+        original_shape = coordinates.shape
+        coords_flat = coordinates.view(-1, original_shape[-1])
+        
+        # Apply Fourier mapping
+        proj = 2 * torch.pi * coords_flat @ self.B.T
+        features = torch.cat([torch.sin(proj), torch.cos(proj)], dim=-1)
+        
+        # Reshape back
+        output_shape = original_shape[:-1] + (self.num_features,)
+        return features.view(output_shape)
+
+
 class SpectralConv2d(nn.Module):
     """2D Spectral Convolution layer."""
     

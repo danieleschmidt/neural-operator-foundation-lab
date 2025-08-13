@@ -65,6 +65,13 @@ try:
 except ImportError:
     pass
 
+# Try to import validation modules
+try:
+    from neural_operator_lab.validation import ModelValidator, DataValidator, ValidationMetrics
+    __all__.extend(["ModelValidator", "DataValidator", "ValidationMetrics"])
+except ImportError:
+    pass
+
 def get_available_modules():
     """Get list of available modules based on installed dependencies."""
     available = ["config"]

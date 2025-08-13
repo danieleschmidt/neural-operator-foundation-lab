@@ -1,0 +1,26 @@
+{
+  "trial_id": "d470e9412dcc_trial_0",
+  "parameters": {
+    "param_a": -3.0,
+    "param_b": -3.0
+  },
+  "result": {
+    "experiment_id": "d470e9412dcc_trial_0",
+    "name": "integration_optimization",
+    "parameters": {
+      "param_a": -3.0,
+      "param_b": -3.0
+    },
+    "metrics": {
+      "integration_optimization": 18.0
+    },
+    "metadata": {},
+    "timestamp": 1755113181.8223884,
+    "duration": 4.76837158203125e-06,
+    "success": true,
+    "error_message": null
+  },
+  "start_time": 1755113181.8223732,
+  "end_time": 1755113181.822378,
+  "status": "completed"
+}
