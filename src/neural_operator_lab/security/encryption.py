@@ -144,6 +144,7 @@ class ModelEncryption:
         try:
             import torch
             import pickle
+import io
             
             # Serialize state dict
             serialized = pickle.dumps(state_dict)
@@ -182,6 +183,7 @@ class ModelEncryption:
         """
         try:
             import pickle
+import io
             
             encrypted_data = encrypted_package['encrypted_data']
             expected_hash = encrypted_package['data_hash']
@@ -195,7 +197,7 @@ class ModelEncryption:
                 raise ValueError("Data integrity check failed - hash mismatch")
             
             # Deserialize state dict
-            state_dict = pickle.loads(decrypted_data)
+            state_dict = torch.load(io.BytesIO(decrypted_data)
             
             # Store metadata
             self._model_metadata = encrypted_package.get('metadata', {})
