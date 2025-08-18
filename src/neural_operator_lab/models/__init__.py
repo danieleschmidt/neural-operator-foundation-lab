@@ -15,6 +15,19 @@ except ImportError:
     _HAS_FOUNDATION = False
     UniversalPhysicsTransformer = None
 
+# Import error handling utilities
+try:
+    from .error_handling import (
+        RobustNeuralOperator, 
+        MemoryAwareForward,
+        GradientHealthChecker,
+        NumericalStabilizer,
+        make_model_robust
+    )
+    _HAS_ERROR_HANDLING = True
+except ImportError:
+    _HAS_ERROR_HANDLING = False
+
 __all__ = [
     'FourierNeuralOperator',
     'ProbabilisticNeuralOperator', 
@@ -26,3 +39,12 @@ __all__ = [
 
 if _HAS_FOUNDATION:
     __all__.append('UniversalPhysicsTransformer')
+
+if _HAS_ERROR_HANDLING:
+    __all__.extend([
+        'RobustNeuralOperator',
+        'MemoryAwareForward', 
+        'GradientHealthChecker',
+        'NumericalStabilizer',
+        'make_model_robust'
+    ])
