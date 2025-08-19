@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "duration": 3.0038115978240967,
+  "stages": {
+    "quality_gates": {
+      "success": true,
+      "duration": 0.5004808902740479
+    },
+    "infrastructure_provisioning": {
+      "success": true,
+      "duration": 0.5002713203430176
+    },
+    "kubernetes_resources": {
+      "success": true,
+      "duration": 0.5003249645233154
+    },
+    "application_deployment": {
+      "success": true,
+      "duration": 0.5002908706665039
+    },
+    "monitoring_setup": {
+      "success": true,
+      "duration": 0.5002939701080322
+    },
+    "deployment_validation": {
+      "success": true,
+      "duration": 0.5003833770751953
+    }
+  }
+}
