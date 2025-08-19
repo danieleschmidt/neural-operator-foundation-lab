@@ -7,6 +7,17 @@ from .geometric import GeometricNeuralOperator
 from .physics_informed import PhysicsInformedUniversalNeuralOperator
 from .adaptive import MultiResolutionAdaptiveNeuralOperator
 
+# Import quantum neural operator
+try:
+    from .quantum_neural_operator import (
+        QuantumNeuralOperator,
+        QuantumConfig,
+        create_quantum_neural_operator
+    )
+    _HAS_QUANTUM = True
+except ImportError:
+    _HAS_QUANTUM = False
+
 # Import foundation models if available
 try:
     from .foundation import UniversalPhysicsTransformer
@@ -36,6 +47,13 @@ __all__ = [
     'PhysicsInformedUniversalNeuralOperator',
     'MultiResolutionAdaptiveNeuralOperator'
 ]
+
+if _HAS_QUANTUM:
+    __all__.extend([
+        'QuantumNeuralOperator',
+        'QuantumConfig',
+        'create_quantum_neural_operator'
+    ])
 
 if _HAS_FOUNDATION:
     __all__.append('UniversalPhysicsTransformer')
