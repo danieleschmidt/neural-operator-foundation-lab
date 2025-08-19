@@ -313,7 +313,7 @@ class InferenceEngine:
             # Get model
             model = self.registry.get_model(request.model_id)
             if model is None:
-                raise HTTPException(status_code=404, f"Model {request.model_id} not found")
+                raise HTTPException(status_code=404, detail=f"Model {request.model_id} not found")
             
             # Warmup model if needed
             await self._warmup_model(request.model_id, model)
