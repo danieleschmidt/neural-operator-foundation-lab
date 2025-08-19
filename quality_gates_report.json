@@ -1,0 +1,272 @@
+{
+  "summary": {
+    "overall_passed": false,
+    "overall_score": 76.34739082119881,
+    "required_failures": [
+      "Security Validation"
+    ],
+    "total_gates": 5,
+    "passed_gates": 4,
+    "failed_gates": 1,
+    "timestamp": 1755611058.37591
+  },
+  "gate_results": [
+    {
+      "name": "Security Validation",
+      "passed": false,
+      "score": 79.51807228915662,
+      "details": {
+        "total_files_scanned": 83,
+        "safe_files": 66,
+        "security_issues": [
+          "Use of eval() function found in src/neural_operator_lab/deployment/production_deployment.py",
+          "Use of eval() function found in src/neural_operator_lab/models/probabilistic.py",
+          "Use of eval() function found in src/neural_operator_lab/monitoring/advanced_error_handler.py",
+          "Use of eval() function found in src/neural_operator_lab/optimization/advanced_performance.py",
+          "Use of eval() function found in src/neural_operator_lab/optimization/compute.py",
+          "Use of eval() function found in src/neural_operator_lab/optimization/performance.py",
+          "Use of eval() function found in src/neural_operator_lab/optimization/quantum_performance.py",
+          "Use of eval() function found in src/neural_operator_lab/quality_gates/enhanced_security_gates.py",
+          "Use of exec() function found in src/neural_operator_lab/quality_gates/enhanced_security_gates.py",
+          "System command execution found in src/neural_operator_lab/quality_gates/enhanced_security_gates.py",
+          "Use of eval() function found in src/neural_operator_lab/research/advanced_benchmarking.py",
+          "Use of eval() function found in src/neural_operator_lab/research/benchmark_suite.py",
+          "Use of eval() function found in src/neural_operator_lab/research/experiment_framework.py",
+          "Use of exec() function found in src/neural_operator_lab/scaling/cloud_native_scaler.py",
+          "Use of eval() function found in src/neural_operator_lab/scaling/intelligent_scaling.py",
+          "Use of eval() function found in src/neural_operator_lab/security/advanced_validation.py",
+          "Use of exec() function found in src/neural_operator_lab/security/advanced_validation.py",
+          "Use of eval() function found in src/neural_operator_lab/security/safe_eval.py",
+          "Use of eval() function found in src/neural_operator_lab/training/trainer.py",
+          "Use of eval() function found in src/neural_operator_lab/training/robust_trainer.py"
+        ],
+        "security_score": 79.51807228915662
+      },
+      "errors": [
+        "Use of eval() function found in src/neural_operator_lab/deployment/production_deployment.py",
+        "Use of eval() function found in src/neural_operator_lab/models/probabilistic.py",
+        "Use of eval() function found in src/neural_operator_lab/monitoring/advanced_error_handler.py",
+        "Use of eval() function found in src/neural_operator_lab/optimization/advanced_performance.py",
+        "Use of eval() function found in src/neural_operator_lab/optimization/compute.py",
+        "Use of eval() function found in src/neural_operator_lab/optimization/performance.py",
+        "Use of eval() function found in src/neural_operator_lab/optimization/quantum_performance.py",
+        "Use of eval() function found in src/neural_operator_lab/quality_gates/enhanced_security_gates.py",
+        "Use of exec() function found in src/neural_operator_lab/quality_gates/enhanced_security_gates.py",
+        "System command execution found in src/neural_operator_lab/quality_gates/enhanced_security_gates.py",
+        "Use of eval() function found in src/neural_operator_lab/research/advanced_benchmarking.py",
+        "Use of eval() function found in src/neural_operator_lab/research/benchmark_suite.py",
+        "Use of eval() function found in src/neural_operator_lab/research/experiment_framework.py",
+        "Use of exec() function found in src/neural_operator_lab/scaling/cloud_native_scaler.py",
+        "Use of eval() function found in src/neural_operator_lab/scaling/intelligent_scaling.py",
+        "Use of eval() function found in src/neural_operator_lab/security/advanced_validation.py",
+        "Use of exec() function found in src/neural_operator_lab/security/advanced_validation.py",
+        "Use of eval() function found in src/neural_operator_lab/security/safe_eval.py",
+        "Use of eval() function found in src/neural_operator_lab/training/trainer.py",
+        "Use of eval() function found in src/neural_operator_lab/training/robust_trainer.py"
+      ],
+      "warnings": [],
+      "timestamp": 1755611056.757559
+    },
+    {
+      "name": "Performance Benchmarks",
+      "passed": true,
+      "score": 98.87490272521973,
+      "details": {
+        "fallback_benchmark": true,
+        "computation_time": 0.0011250972747802734,
+        "result": 333283335000
+      },
+      "errors": [],
+      "warnings": [
+        "PyTorch not available for performance testing"
+      ],
+      "timestamp": 1755611056.7597187
+    },
+    {
+      "name": "Code Quality",
+      "passed": true,
+      "score": 93.36474968729092,
+      "details": {
+        "total_files": 83,
+        "total_lines": 34377,
+        "comment_lines": 2361,
+        "docstring_lines": 13687,
+        "blank_lines": 6750,
+        "documentation_ratio": 46.68237484364546,
+        "naming_issues": 0,
+        "code_to_comment_ratio": 2.1421360917248253
+      },
+      "errors": [],
+      "warnings": [],
+      "timestamp": 1755611056.7861395
+    },
+    {
+      "name": "Test Coverage",
+      "passed": true,
+      "score": 36.76470588235294,
+      "details": {
+        "test_files_count": 25,
+        "source_files_count": 68,
+        "test_to_source_ratio": 0.36764705882352944,
+        "compilable_tests": 25,
+        "test_results": [
+          {
+            "file": "./test_advanced_implementation.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./test_comprehensive_validation.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./test_config_standalone.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./test_runner.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./test_syntax_validation.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./test_structure_validation.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./test_generation1.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/end_to_end/test_complete_workflow.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/fixtures/test_data_generator.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/integration/test_training_pipeline.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/performance/test_benchmarks.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/quality_gates/test_autonomous_validation.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/quality_gates/test_progressive_gates.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/quality_gates/test_research_quality_gates.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_adaptive_operators.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_augmentation.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_callbacks.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_config.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_data_loaders.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_distributed.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_geometric_operators.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_models.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_neural_operators.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_physics_informed_operators.py",
+            "compilable": true,
+            "errors": null
+          },
+          {
+            "file": "./tests/unit/test_security.py",
+            "compilable": true,
+            "errors": null
+          }
+        ]
+      },
+      "errors": [],
+      "warnings": [],
+      "timestamp": 1755611058.3750143
+    },
+    {
+      "name": "Documentation",
+      "passed": true,
+      "score": 78.57142857142857,
+      "details": {
+        "required_docs_present": {
+          "README.md": true,
+          "LICENSE": true,
+          "CONTRIBUTING.md": true,
+          "requirements.txt": true,
+          "pyproject.toml": true,
+          "setup.py": true,
+          "examples/": true,
+          "docs/": true
+        },
+        "documentation_score": 78.57142857142857,
+        "readme_quality": 57.14285714285714,
+        "missing_docs": []
+      },
+      "errors": [],
+      "warnings": [],
+      "timestamp": 1755611058.3757582
+    }
+  ],
+  "recommendations": [
+    "\ud83d\udd12 Review and fix security issues before production deployment",
+    "\u26a0\ufe0f PyTorch not available for performance testing"
+  ]
+}
