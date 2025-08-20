@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Production deployment utilities for neural operators.
 
 This module provides comprehensive production deployment capabilities including
@@ -266,7 +270,7 @@ class HealthChecker:
         
         # Simple health check: forward pass with dummy data
         try:
-            model.eval()
+            # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
             with torch.no_grad():
                 # Create dummy input based on model's expected input
                 dummy_input = torch.randn(1, 64, 4)  # Batch, points, features
@@ -328,7 +332,7 @@ class InferenceEngine:
                 grid_tensor = grid_tensor.view(request.grid_shape)
             
             # Perform inference
-            model.eval()
+            # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
             with torch.no_grad():
                 if grid_tensor is not None:
                     output = model(input_tensor, grid_tensor)
@@ -455,7 +459,7 @@ class InferenceEngine:
                 return [await self.predict(req) for req in requests]
             
             # Batch inference
-            model.eval()
+            # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
             with torch.no_grad():
                 if batched_grid is not None:
                     batch_output = model(batched_input, batched_grid)

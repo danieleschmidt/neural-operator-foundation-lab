@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Probabilistic Neural Operator (PNO) implementation with uncertainty quantification."""
 
 import torch
@@ -283,7 +287,7 @@ class ProbabilisticNeuralOperator(NeuralOperatorBase):
     
     def calibrate_uncertainty(self, val_loader, num_samples: int = 20) -> Dict[str, float]:
         """Calibrate uncertainty estimates on validation data."""
-        self.eval()
+        # SECURITY_DISABLED: self.eval(...)  # eval() disabled for security
         
         all_predictions = []
         all_targets = []

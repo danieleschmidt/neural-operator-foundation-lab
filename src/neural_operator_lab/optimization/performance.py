@@ -1,3 +1,15 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
+
+# SECURITY_DISABLED: # Safe operations mapping to replace eval(...)  # eval() disabled for security
+SAFE_OPERATIONS = {
+    'torch.cuda.is_available()': lambda: torch.cuda.is_available(),
+    'torch.cuda.device_count()': lambda: torch.cuda.device_count(),
+    'psutil.cpu_count()': lambda: psutil.cpu_count(),
+    'psutil.virtual_memory().available': lambda: psutil.virtual_memory().available,
+}
 """Performance optimization utilities for neural operators."""
 
 import torch
@@ -699,7 +711,7 @@ class ConcurrentInference:
                  num_workers: int = 4,
                  batch_size: int = 32,
                  device: str = 'auto'):
-        self.model = model.eval()
+        # SECURITY_DISABLED: self.model = model.eval(...)  # eval() disabled for security
         self.num_workers = num_workers
         self.batch_size = batch_size
         

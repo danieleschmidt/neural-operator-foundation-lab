@@ -1,3 +1,15 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
+
+# SECURITY_DISABLED: # Safe operations mapping to replace eval(...)  # eval() disabled for security
+SAFE_OPERATIONS = {
+    'torch.cuda.is_available()': lambda: torch.cuda.is_available(),
+    'torch.cuda.device_count()': lambda: torch.cuda.device_count(),
+    'psutil.cpu_count()': lambda: psutil.cpu_count(),
+    'psutil.virtual_memory().available': lambda: psutil.virtual_memory().available,
+}
 """Advanced Performance Optimization Suite
 
 Comprehensive performance optimization including GPU kernels, memory management,
@@ -515,7 +527,7 @@ class PerformanceOptimizer:
         """Comprehensive model benchmarking."""
         
         device = next(model.parameters()).device
-        model.eval()
+        # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
         
         # Create dummy input
         dummy_input = torch.randn(input_shape, device=device)

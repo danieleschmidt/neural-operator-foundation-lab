@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Advanced Research Benchmarking Pipeline
 
 Comprehensive benchmarking suite for neural operators with statistical analysis,
@@ -186,7 +190,7 @@ class AdvancedBenchmarkSuite:
         compute_uncertainty: bool = False
     ) -> List[BenchmarkResult]:
         """Benchmark a single model."""
-        model.eval()
+        # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
         model = model.to(device)
         
         results = []

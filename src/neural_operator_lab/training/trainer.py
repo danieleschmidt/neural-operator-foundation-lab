@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Main training infrastructure for neural operators."""
 
 import torch
@@ -365,7 +369,7 @@ class Trainer:
     
     def validate_epoch(self, val_loader: DataLoader) -> Dict[str, float]:
         """Validate for one epoch."""
-        self.model.eval()
+        # SECURITY_DISABLED: self.model.eval(...)  # eval() disabled for security
         val_losses = {}
         num_batches = 0
         
@@ -595,7 +599,7 @@ class Trainer:
                         timesteps: int = 100,
                         compute_conservation: bool = True) -> Dict[str, Any]:
         """Evaluate rollout performance over multiple timesteps."""
-        self.model.eval()
+        # SECURITY_DISABLED: self.model.eval(...)  # eval() disabled for security
         
         rollout_errors = []
         conservation_violations = []

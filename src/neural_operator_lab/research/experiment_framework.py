@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Experimental framework for hypothesis-driven neural operator research."""
 
 import torch
@@ -232,7 +236,7 @@ class HypothesisTester:
                        test_data: Tuple[torch.Tensor, torch.Tensor],
                        metrics: List[str]) -> Dict[str, float]:
         """Evaluate model on test data."""
-        model.eval()
+        # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
         test_x, test_y = test_data
         
         with torch.no_grad():

@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import logging
 import warnings
-from typing import Optional, Dict, Any, Callable, Type
+from typing import Optional, Dict, Any, Callable, Type, List
 from functools import wraps
 from contextlib import contextmanager
 import traceback
