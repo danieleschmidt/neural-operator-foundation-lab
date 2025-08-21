@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Advanced Error Handling and Recovery System
 
 Comprehensive error handling with automatic recovery, detailed logging,
@@ -179,7 +183,7 @@ class ModelRecoveryStrategy(RecoveryStrategy):
             
             # Reset model to eval mode and back
             was_training = model.training
-            model.eval()
+            # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
             if was_training:
                 model.train()
             

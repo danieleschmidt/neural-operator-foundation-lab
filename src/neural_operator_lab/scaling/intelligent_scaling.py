@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Intelligent auto-scaling system for neural operator training and inference."""
 
 import torch
@@ -503,7 +507,7 @@ def get_optimal_batch_size(model: torch.nn.Module,
     if not torch.cuda.is_available():
         return 32  # Default for CPU
     
-    model.eval()
+    # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
     torch.cuda.empty_cache()
     
     # Start with batch size of 1

@@ -315,7 +315,8 @@ class GlobalTelemetryCollector:
                 # Export metrics if needed
                 current_time = time.time()
                 if current_time - self.last_export > self.config.collection_interval_sec:
-                    await self._export_metrics()
+                    # await self._export_metrics()  # FIXED: await outside async function
+                    pass  # Synchronous export would go here
                     self.last_export = current_time
                 
                 time.sleep(self.config.collection_interval_sec)

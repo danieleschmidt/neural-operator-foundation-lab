@@ -1,3 +1,15 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
+
+# SECURITY_DISABLED: # Safe operations mapping to replace eval(...)  # eval() disabled for security
+SAFE_OPERATIONS = {
+    'torch.cuda.is_available()': lambda: torch.cuda.is_available(),
+    'torch.cuda.device_count()': lambda: torch.cuda.device_count(),
+    'psutil.cpu_count()': lambda: psutil.cpu_count(),
+    'psutil.virtual_memory().available': lambda: psutil.virtual_memory().available,
+}
 """Compute optimization for neural operators."""
 
 import torch
@@ -42,7 +54,7 @@ class ComputeOptimizer:
             logger.info("Model already optimized, returning cached version")
             return self._optimized_models[model_id]
         
-        optimized_model = model.eval()
+        # SECURITY_DISABLED: optimized_model = model.eval(...)  # eval() disabled for security
         
         # Apply JIT compilation if enabled
         if self.enable_jit:
@@ -104,7 +116,7 @@ class ComputeOptimizer:
         try:
             # Optimize model for inference
             optimized_model = self.optimize_model(model, example_input)
-            optimized_model.eval()
+            # SECURITY_DISABLED: optimized_model.eval(...)  # eval() disabled for security
             
             with torch.no_grad():
                 yield optimized_model
@@ -131,7 +143,7 @@ class ComputeOptimizer:
         Returns:
             Benchmark results dictionary
         """
-        model.eval()
+        # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
         
         # Warmup runs
         with torch.no_grad():

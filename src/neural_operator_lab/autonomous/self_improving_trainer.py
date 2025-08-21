@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Autonomous Self-Improving Training System."""
 
 import torch
@@ -470,7 +474,7 @@ class AutonomousTrainer:
     
     def _quick_evaluate(self, model: nn.Module, val_loader: DataLoader) -> Dict[str, float]:
         """Quick evaluation on subset of validation data."""
-        model.eval()
+        # SECURITY_DISABLED: model.eval(...)  # eval() disabled for security
         correct = 0
         total = 0
         

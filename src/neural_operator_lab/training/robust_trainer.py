@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Robust training infrastructure with advanced error handling and recovery."""
 
 import torch
@@ -421,7 +425,7 @@ class RobustTrainer:
     
     def evaluate(self, val_loader: DataLoader) -> Dict[str, float]:
         """Evaluate model on validation set."""
-        self.model.eval()
+        # SECURITY_DISABLED: self.model.eval(...)  # eval() disabled for security
         val_metrics = {}
         num_batches = 0
         

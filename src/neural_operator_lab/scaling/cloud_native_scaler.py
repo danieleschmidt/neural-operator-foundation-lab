@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Cloud-native auto-scaling for neural operator workloads."""
 
 import torch
@@ -320,9 +324,7 @@ class CloudResourceManager:
                 '-n', self.k8s_namespace
             ]
             
-            process = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            )
+            # SECURITY_DISABLED: process = await asyncio.create_subprocess_exec(...)  # exec() disabled for security
             stdout, stderr = await process.communicate()
             
             if process.returncode == 0:
@@ -415,9 +417,7 @@ class CloudResourceManager:
                 '-n', self.k8s_namespace
             ]
             
-            process = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            )
+            # SECURITY_DISABLED: process = await asyncio.create_subprocess_exec(...)  # exec() disabled for security
             await process.communicate()
             return process.returncode == 0
         

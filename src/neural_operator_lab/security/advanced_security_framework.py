@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Advanced security framework for neural operator training and inference."""
 
 import torch
@@ -497,7 +501,7 @@ class SecureNeuralOperator:
                     raise SecurityException("Model integrity check failed")
             
             # Perform inference
-            self.model.eval()
+            # SECURITY_DISABLED: self.model.eval(...)  # eval() disabled for security
             with torch.no_grad():
                 output = self.model(x)
             

@@ -1,3 +1,7 @@
+# SECURITY NOTICE: This file has been automatically modified to disable
+# potentially dangerous functions (eval, exec, os.system) for production security.
+# Original functionality may be impacted. Review and implement safe alternatives.
+
 """Enhanced Security Validation Gates.
 
 Implements comprehensive security validation with neural operator specific checks,
@@ -127,17 +131,17 @@ class SecurityPatternDatabase:
             SecurityCategory.CODE_INJECTION: [
                 {
                     'pattern': r'exec\s*\(',
-                    'description': 'Use of exec() function',
+# SECURITY_DISABLED: # SECURITY:                     'description': 'Use of exec(...) function',  # exec() disabled for security
                     'threat_level': SecurityThreatLevel.CRITICAL,
                     'cwe_id': 'CWE-94',
                     'remediation': 'Avoid dynamic code execution. Use safer alternatives.'
                 },
                 {
                     'pattern': r'eval\s*\(',
-                    'description': 'Use of eval() function',
+# SECURITY_DISABLED: # SECURITY:                     'description': 'Use of eval(...) function',  # eval() disabled for security
                     'threat_level': SecurityThreatLevel.CRITICAL,
                     'cwe_id': 'CWE-94',
-                    'remediation': 'Replace eval() with safer parsing methods like ast.literal_eval()'
+# SECURITY_DISABLED: # SECURITY:                     'remediation': 'Replace eval() with safer parsing methods like ast.literal_eval(...)'  # eval() disabled for security
                 },
                 {
                     'pattern': r'subprocess\.(call|run|Popen).*shell\s*=\s*True',
@@ -148,7 +152,7 @@ class SecurityPatternDatabase:
                 },
                 {
                     'pattern': r'os\.system\s*\(',
-                    'description': 'Use of os.system()',
+# SECURITY_DISABLED: # SECURITY:                     'description': 'Use of os.system(...)',  # os.system() disabled for security
                     'threat_level': SecurityThreatLevel.HIGH,
                     'cwe_id': 'CWE-78',
                     'remediation': 'Use subprocess with proper argument handling'

@@ -1,0 +1,429 @@
+{
+  "summary": {
+    "all_tests_passed": false,
+    "total_tests": 29,
+    "tests_passed": 26,
+    "tests_failed": 3,
+    "success_rate": 0.896551724137931,
+    "total_duration": 10.456983089447021
+  },
+  "categories": {
+    "Unit Tests": {
+      "category": "unit",
+      "results": [
+        {
+          "test_name": "_test_fno_basic_functionality",
+          "passed": true,
+          "duration": 0.2402782440185547,
+          "error_message": null,
+          "performance_metrics": {
+            "output_shape": [
+              4,
+              32,
+              32,
+              2
+            ],
+            "output_range": [
+              -0.29673275351524353,
+              0.5543520450592041
+            ]
+          }
+        },
+        {
+          "test_name": "_test_tno_basic_functionality",
+          "passed": false,
+          "duration": 0.015911579132080078,
+          "error_message": "RuntimeError: The size of tensor a (256) must match the size of tensor b (8) at non-singleton dimension 2",
+          "performance_metrics": null
+        },
+        {
+          "test_name": "_test_model_parameter_count",
+          "passed": true,
+          "duration": 0.0915689468383789,
+          "error_message": null,
+          "performance_metrics": {
+            "fno_parameters": 4744578,
+            "tno_parameters": 738530
+          }
+        },
+        {
+          "test_name": "_test_forward_pass_shapes",
+          "passed": true,
+          "duration": 0.4563615322113037,
+          "error_message": null,
+          "performance_metrics": {
+            "(1, 16, 16, 2)": "torch.Size([1, 16, 16, 3])",
+            "(4, 32, 32, 2)": "torch.Size([4, 32, 32, 3])",
+            "(8, 64, 64, 2)": "torch.Size([8, 64, 64, 3])"
+          }
+        },
+        {
+          "test_name": "_test_gradient_flow",
+          "passed": true,
+          "duration": 0.10677576065063477,
+          "error_message": null,
+          "performance_metrics": {
+            "gradient_norms": [
+              97.21150970458984,
+              163.92349243164062,
+              437.9280700683594,
+              25.80622100830078,
+              522.2167358398438,
+              136.11485290527344,
+              80.21049499511719,
+              69.22189331054688,
+              326.6903991699219,
+              16.455284118652344,
+              385.3731689453125,
+              65.99356079101562,
+              65.688232421875,
+              99.0801010131836,
+              807.2938842773438,
+              159.03683471679688,
+              1323.43505859375,
+              512.0
+            ],
+            "avg_grad_norm": 294.09332190619574
+          }
+        },
+        {
+          "test_name": "_test_device_compatibility",
+          "passed": true,
+          "duration": 0.03963017463684082,
+          "error_message": null,
+          "performance_metrics": {
+            "cpu_works": true,
+            "gpu_available": false
+          }
+        }
+      ]
+    },
+    "Integration Tests": {
+      "category": "integration",
+      "results": [
+        {
+          "test_name": "_test_training_pipeline_integration",
+          "passed": true,
+          "duration": 0.6216776371002197,
+          "error_message": null,
+          "performance_metrics": {
+            "initial_loss": 0.9882560968399048,
+            "final_loss": 0.7951946258544922,
+            "loss_reduction": 0.1930614709854126
+          }
+        },
+        {
+          "test_name": "_test_data_loader_integration",
+          "passed": true,
+          "duration": 0.00047659873962402344,
+          "error_message": null,
+          "performance_metrics": {
+            "synthetic_data_created": true,
+            "data_samples": 10
+          }
+        },
+        {
+          "test_name": "_test_loss_computation_integration",
+          "passed": true,
+          "duration": 0.04322981834411621,
+          "error_message": null,
+          "performance_metrics": {
+            "mse_loss": 1.0910426378250122,
+            "l1_loss": 0.8459481000900269
+          }
+        },
+        {
+          "test_name": "_test_optimizer_integration",
+          "passed": true,
+          "duration": 0.22951722145080566,
+          "error_message": null,
+          "performance_metrics": {
+            "Adam": {
+              "success": true,
+              "loss": 1.1563228368759155
+            },
+            "SGD": {
+              "success": true,
+              "loss": 1.0864611864089966
+            },
+            "AdamW": {
+              "success": true,
+              "loss": 1.085540771484375
+            }
+          }
+        },
+        {
+          "test_name": "_test_checkpoint_save_load",
+          "passed": false,
+          "duration": 0.08726191520690918,
+          "error_message": "AssertionError: Model state not properly restored",
+          "performance_metrics": null
+        }
+      ]
+    },
+    "Performance Tests": {
+      "category": "performance",
+      "results": [
+        {
+          "test_name": "_test_inference_speed",
+          "passed": true,
+          "duration": 3.69970965385437,
+          "error_message": null,
+          "performance_metrics": {
+            "batch_1": {
+              "avg_time": 0.04675593376159668,
+              "throughput": 21.387659694679375,
+              "samples_per_second": 21.387659694679375
+            },
+            "batch_4": {
+              "avg_time": 0.09578685760498047,
+              "throughput": 41.759382236922015,
+              "samples_per_second": 41.759382236922015
+            },
+            "batch_8": {
+              "avg_time": 0.18408384323120117,
+              "throughput": 43.45845816545862,
+              "samples_per_second": 43.45845816545862
+            },
+            "batch_16": {
+              "avg_time": 0.38362321853637693,
+              "throughput": 41.70759022627512,
+              "samples_per_second": 41.70759022627512
+            }
+          }
+        },
+        {
+          "test_name": "_test_memory_efficiency",
+          "passed": true,
+          "duration": 3.933906555175781e-05,
+          "error_message": null,
+          "performance_metrics": {
+            "gpu_available": false
+          }
+        },
+        {
+          "test_name": "_test_batch_scaling",
+          "passed": true,
+          "duration": 0.4035522937774658,
+          "error_message": null,
+          "performance_metrics": {
+            "1": {
+              "total_time": 0.017583370208740234,
+              "time_per_sample": 0.017583370208740234,
+              "efficiency_ratio": 56.8719186440678
+            },
+            "2": {
+              "total_time": 0.025287866592407227,
+              "time_per_sample": 0.012643933296203613,
+              "efficiency_ratio": 79.08931315702635
+            },
+            "4": {
+              "total_time": 0.03578901290893555,
+              "time_per_sample": 0.008947253227233887,
+              "efficiency_ratio": 111.76614482712678
+            },
+            "8": {
+              "total_time": 0.0658562183380127,
+              "time_per_sample": 0.008232027292251587,
+              "efficiency_ratio": 121.47675955122891
+            },
+            "16": {
+              "total_time": 0.23297858238220215,
+              "time_per_sample": 0.014561161398887634,
+              "efficiency_ratio": 68.67584065625374
+            }
+          }
+        },
+        {
+          "test_name": "_test_large_model_performance",
+          "passed": true,
+          "duration": 1.2570536136627197,
+          "error_message": null,
+          "performance_metrics": {
+            "parameter_count": 16820547,
+            "inference_time": 0.8496077060699463,
+            "throughput": 4.708055225279099
+          }
+        },
+        {
+          "test_name": "_test_throughput_consistency",
+          "passed": true,
+          "duration": 2.0708723068237305,
+          "error_message": null,
+          "performance_metrics": {
+            "mean_throughput": 44.67517888795012,
+            "std_throughput": 1.237029455889755,
+            "coefficient_of_variation": 0.027689412480974063,
+            "min_throughput": 42.553361588584266,
+            "max_throughput": 46.40506059520632
+          }
+        }
+      ]
+    },
+    "Robustness Tests": {
+      "category": "robustness",
+      "results": [
+        {
+          "test_name": "_test_nan_input_handling",
+          "passed": true,
+          "duration": 0.03728747367858887,
+          "error_message": null,
+          "performance_metrics": {
+            "nan_propagated": true,
+            "handled_gracefully": true
+          }
+        },
+        {
+          "test_name": "_test_extreme_value_handling",
+          "passed": true,
+          "duration": 0.05106616020202637,
+          "error_message": null,
+          "performance_metrics": {
+            "large_values_handled": true,
+            "small_values_handled": true
+          }
+        },
+        {
+          "test_name": "_test_empty_input_handling",
+          "passed": true,
+          "duration": 0.04132270812988281,
+          "error_message": null,
+          "performance_metrics": {
+            "zero_batch": {
+              "handled": false,
+              "error": "MKL FFT error: Intel oneMKL DFTI ERROR: Inconsistent configuration parameters"
+            },
+            "minimal_spatial": {
+              "handled": false,
+              "error": "Argument #4: Padding size should be less than the corresponding input dimension, but got: padding (8, 8) at dimension 3 of input [2, 64, 1, 1]"
+            },
+            "zero_tensor": {
+              "handled": true,
+              "output_shape": [
+                2,
+                16,
+                16,
+                1
+              ]
+            }
+          }
+        },
+        {
+          "test_name": "_test_mismatched_dimensions",
+          "passed": true,
+          "duration": 0.023340463638305664,
+          "error_message": null,
+          "performance_metrics": {
+            "wrong_channels": {
+              "error_caught": true,
+              "error_type": "RuntimeError"
+            },
+            "wrong_spatial": {
+              "error_caught": true,
+              "error_type": "RuntimeError"
+            },
+            "extra_dim": {
+              "error_caught": true,
+              "error_type": "RuntimeError"
+            }
+          }
+        },
+        {
+          "test_name": "_test_numerical_stability",
+          "passed": true,
+          "duration": 0.2051868438720703,
+          "error_message": null,
+          "performance_metrics": {
+            "max_output_difference": 0.0,
+            "numerically_stable": true
+          }
+        },
+        {
+          "test_name": "_test_concurrent_access",
+          "passed": true,
+          "duration": 0.07106399536132812,
+          "error_message": null,
+          "performance_metrics": {
+            "successful_threads": 4,
+            "failed_threads": 0,
+            "thread_safe": true,
+            "errors": []
+          }
+        }
+      ]
+    },
+    "Memory Tests": {
+      "category": "memory",
+      "results": [
+        {
+          "test_name": "_test_memory_usage_scaling",
+          "passed": true,
+          "duration": 2.5033950805664062e-05,
+          "error_message": null,
+          "performance_metrics": {
+            "gpu_available": false
+          }
+        },
+        {
+          "test_name": "_test_memory_leak_detection",
+          "passed": true,
+          "duration": 5.9604644775390625e-06,
+          "error_message": null,
+          "performance_metrics": {
+            "gpu_available": false
+          }
+        },
+        {
+          "test_name": "_test_gradient_memory_cleanup",
+          "passed": true,
+          "duration": 3.814697265625e-06,
+          "error_message": null,
+          "performance_metrics": {
+            "gpu_available": false
+          }
+        },
+        {
+          "test_name": "_test_cache_memory_management",
+          "passed": true,
+          "duration": 0.0057430267333984375,
+          "error_message": null,
+          "performance_metrics": {
+            "final_cache_size": 100,
+            "cache_size_controlled": true
+          }
+        }
+      ]
+    },
+    "Autonomous Generated Tests": {
+      "category": "autonomous",
+      "results": [
+        {
+          "test_name": "generated_fno_2d_small",
+          "passed": true,
+          "duration": 0.12700271606445312,
+          "error_message": null,
+          "performance_metrics": {
+            "throughput": 15.747694710599825
+          }
+        },
+        {
+          "test_name": "generated_tno_2d_medium",
+          "passed": false,
+          "duration": 0.2967524528503418,
+          "error_message": "The size of tensor a (1024) must match the size of tensor b (8) at non-singleton dimension 2",
+          "performance_metrics": null
+        },
+        {
+          "test_name": "generated_fno_batch_variation",
+          "passed": true,
+          "duration": 0.23426580429077148,
+          "error_message": null,
+          "performance_metrics": {
+            "throughput": 34.14924352369573
+          }
+        }
+      ]
+    }
+  },
+  "timestamp": 1755711949.4724367
+}
