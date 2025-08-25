@@ -7,7 +7,7 @@ from .geometric import GeometricNeuralOperator
 from .physics_informed import PhysicsInformedUniversalNeuralOperator
 from .adaptive import MultiResolutionAdaptiveNeuralOperator
 
-# Import quantum neural operator
+# Import quantum neural operators
 try:
     from .quantum_neural_operator import (
         QuantumNeuralOperator,
@@ -17,6 +17,17 @@ try:
     _HAS_QUANTUM = True
 except ImportError:
     _HAS_QUANTUM = False
+
+# Import QISA (Quantum-Inspired Spectral Attention) neural operator
+try:
+    from .quantum_spectral_neural_operator import (
+        QuantumInspiredSpectralAttentionNeuralOperator,
+        QISAConfig,
+        create_qisa_model
+    )
+    _HAS_QISA = True
+except ImportError:
+    _HAS_QISA = False
 
 # Import foundation models if available
 try:
@@ -53,6 +64,13 @@ if _HAS_QUANTUM:
         'QuantumNeuralOperator',
         'QuantumConfig',
         'create_quantum_neural_operator'
+    ])
+
+if _HAS_QISA:
+    __all__.extend([
+        'QuantumInspiredSpectralAttentionNeuralOperator',
+        'QISAConfig', 
+        'create_qisa_model'
     ])
 
 if _HAS_FOUNDATION:
