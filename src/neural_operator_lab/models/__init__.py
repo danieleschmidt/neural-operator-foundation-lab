@@ -20,10 +20,13 @@ except ImportError:
 
 # Import QISA (Quantum-Inspired Spectral Attention) neural operator
 try:
-    from .quantum_spectral_neural_operator import (
-        QuantumInspiredSpectralAttentionNeuralOperator,
-        QISAConfig,
-        create_qisa_model
+    from .quantum_spectral_attention import (
+        QuantumSpectralAttentionOperator,
+        QuantumSpectralAttention,
+        validate_quantum_superposition,
+        validate_spectral_gates_unitarity,
+        compute_spectral_correlation,
+        compute_energy_conservation
     )
     _HAS_QISA = True
 except ImportError:
@@ -68,9 +71,12 @@ if _HAS_QUANTUM:
 
 if _HAS_QISA:
     __all__.extend([
-        'QuantumInspiredSpectralAttentionNeuralOperator',
-        'QISAConfig', 
-        'create_qisa_model'
+        'QuantumSpectralAttentionOperator',
+        'QuantumSpectralAttention',
+        'validate_quantum_superposition',
+        'validate_spectral_gates_unitarity',
+        'compute_spectral_correlation',
+        'compute_energy_conservation'
     ])
 
 if _HAS_FOUNDATION:
