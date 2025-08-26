@@ -1,605 +1,372 @@
-"""Intelligent Auto-Scaling System
+"""Intelligent Auto-Scaling System for QISA Neural Operators.
 
-Advanced auto-scaling with load balancing, resource optimization,
-and intelligent scaling decisions based on workload patterns.
+Advanced auto-scaling system that dynamically adjusts computational resources
+based on workload demands, model complexity, and performance requirements:
+
+- Dynamic GPU allocation and load balancing
+- Intelligent batch size optimization  
+- Adaptive model parallelism
+- Resource usage prediction
+- Cost-aware scaling decisions
+- Multi-cloud resource management
 """
 
 import torch
 import torch.nn as nn
-import torch.distributed as dist
+from typing import Dict, List, Optional, Tuple, Any, Union, Callable
+import numpy as np
 import time
 import threading
 import queue
-import json
-from typing import Dict, List, Any, Optional, Tuple, Callable, Union
-from dataclasses import dataclass, field
-from abc import ABC, abstractmethod
-from contextlib import contextmanager
-import logging
-import numpy as np
 from collections import deque, defaultdict
-import asyncio
-import multiprocessing as mp
+import logging
+import json
+from dataclasses import dataclass
+from enum import Enum
+import psutil
+import subprocess
 
 try:
-    import psutil
-    HAS_PSUTIL = True
+    import torch.distributed as dist
+    from torch.nn.parallel import DistributedDataParallel as DDP
+    DISTRIBUTED_AVAILABLE = True
 except ImportError:
-    HAS_PSUTIL = False
+    DISTRIBUTED_AVAILABLE = False
 
 try:
-    import ray
-    HAS_RAY = True
+    import gpustat
+    GPU_MONITORING_AVAILABLE = True
 except ImportError:
-    HAS_RAY = False
+    GPU_MONITORING_AVAILABLE = False
 
-from neural_operator_lab.base import NeuralOperatorBase
+
+class ScalingDecision(Enum):
+    """Auto-scaling decision types."""
+    SCALE_UP = "scale_up"
+    SCALE_DOWN = "scale_down"
+    MAINTAIN = "maintain"
+    OPTIMIZE = "optimize"
+
+
+class ResourceType(Enum):
+    """Resource types for scaling."""
+    GPU = "gpu"
+    CPU = "cpu"
+    MEMORY = "memory"
+    BATCH_SIZE = "batch_size"
+    MODEL_PARALLEL = "model_parallel"
 
 
 @dataclass
 class ResourceMetrics:
-    """System resource metrics."""
+    """Resource utilization metrics."""
     timestamp: float
-    cpu_percent: float
-    memory_percent: float
-    gpu_memory_percent: float
-    gpu_utilization: float
-    network_io_mbps: float
-    disk_io_mbps: float
-    temperature_celsius: float
-    power_consumption_watts: float
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'timestamp': self.timestamp,
-            'cpu_percent': self.cpu_percent,
-            'memory_percent': self.memory_percent,
-            'gpu_memory_percent': self.gpu_memory_percent,
-            'gpu_utilization': self.gpu_utilization,
-            'network_io_mbps': self.network_io_mbps,
-            'disk_io_mbps': self.disk_io_mbps,
-            'temperature_celsius': self.temperature_celsius,
-            'power_consumption_watts': self.power_consumption_watts
-        }
+    gpu_utilization: Dict[int, float]  # GPU ID -> utilization %
+    gpu_memory: Dict[int, Tuple[float, float]]  # GPU ID -> (used_gb, total_gb)
+    cpu_utilization: float
+    system_memory: Tuple[float, float]  # (used_gb, total_gb)
+    inference_time: Optional[float] = None
+    throughput: Optional[float] = None  # samples/second
+    batch_size: Optional[int] = None
+    queue_length: Optional[int] = None
 
 
 @dataclass
-class WorkloadMetrics:
-    """Training workload metrics."""
-    timestamp: float
-    batch_size: int
-    throughput_samples_per_sec: float
-    loss_value: float
-    gradient_norm: float
-    learning_rate: float
-    epoch: int
-    step: int
-    estimated_remaining_time: float
-    queue_size: int
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'timestamp': self.timestamp,
-            'batch_size': self.batch_size,
-            'throughput_samples_per_sec': self.throughput_samples_per_sec,
-            'loss_value': self.loss_value,
-            'gradient_norm': self.gradient_norm,
-            'learning_rate': self.learning_rate,
-            'epoch': self.epoch,
-            'step': self.step,
-            'estimated_remaining_time': self.estimated_remaining_time,
-            'queue_size': self.queue_size
-        }
-
-
-@dataclass
-class ScalingDecision:
-    """Auto-scaling decision."""
-    action: str  # "scale_up", "scale_down", "maintain", "migrate"
-    target_replicas: int
-    target_batch_size: int
-    reason: str
+class ScalingAction:
+    """Scaling action to be performed."""
+    action_type: ScalingDecision
+    resource_type: ResourceType
+    current_value: Union[int, float]
+    target_value: Union[int, float]
+    estimated_impact: Dict[str, float]
     confidence: float
-    estimated_performance_gain: float
-    estimated_cost_change: float
-    
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            'action': self.action,
-            'target_replicas': self.target_replicas,
-            'target_batch_size': self.target_batch_size,
-            'reason': self.reason,
-            'confidence': self.confidence,
-            'estimated_performance_gain': self.estimated_performance_gain,
-            'estimated_cost_change': self.estimated_cost_change
-        }
+    reasoning: str
 
 
 class ResourceMonitor:
-    """Advanced system resource monitoring."""
+    """Monitor system resources and performance metrics."""
     
-    def __init__(self, monitoring_interval: float = 1.0):
+    def __init__(self, monitoring_interval: float = 5.0, history_size: int = 1000):
         self.monitoring_interval = monitoring_interval
-        self.metrics_history = deque(maxlen=1000)
+        self.history_size = history_size
+        
+        # Metrics storage
+        self.metrics_history = deque(maxlen=history_size)
+        self.performance_history = deque(maxlen=history_size)
+        
+        # Threading
         self.monitoring_active = False
         self.monitor_thread = None
-        self._lock = threading.Lock()
+        self.stop_event = threading.Event()
         
+        # Current state
+        self.current_metrics = None
         self.logger = logging.getLogger(__name__)
-    
+        
     def start_monitoring(self):
         """Start resource monitoring in background thread."""
-        if not self.monitoring_active:
-            self.monitoring_active = True
-            self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
-            self.monitor_thread.start()
-            self.logger.info("Resource monitoring started")
+        if self.monitoring_active:
+            return
+        
+        self.monitoring_active = True
+        self.stop_event.clear()
+        
+        self.monitor_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
+        self.monitor_thread.start()
+        
+        self.logger.info("Resource monitoring started")
     
     def stop_monitoring(self):
         """Stop resource monitoring."""
+        if not self.monitoring_active:
+            return
+        
         self.monitoring_active = False
+        self.stop_event.set()
+        
         if self.monitor_thread:
-            self.monitor_thread.join(timeout=5.0)
+            self.monitor_thread.join(timeout=10.0)
+        
         self.logger.info("Resource monitoring stopped")
     
-    def _monitor_loop(self):
+    def _monitoring_loop(self):
         """Main monitoring loop."""
-        while self.monitoring_active:
+        while not self.stop_event.wait(self.monitoring_interval):
             try:
                 metrics = self._collect_metrics()
-                with self._lock:
-                    self.metrics_history.append(metrics)
-                time.sleep(self.monitoring_interval)
+                self.metrics_history.append(metrics)
+                self.current_metrics = metrics
+                
             except Exception as e:
-                self.logger.error(f"Error in monitoring loop: {e}")
+                self.logger.error(f"Error collecting metrics: {e}")
     
     def _collect_metrics(self) -> ResourceMetrics:
-        """Collect current system metrics."""
-        timestamp = time.time()
-        
-        # CPU and memory
-        cpu_percent = 0.0
-        memory_percent = 0.0
-        network_io_mbps = 0.0
-        disk_io_mbps = 0.0
-        temperature = 0.0
-        power_consumption = 0.0
-        
-        if HAS_PSUTIL:
-            cpu_percent = psutil.cpu_percent()
-            memory_percent = psutil.virtual_memory().percent
-            
-            # Network I/O
-            net_io = psutil.net_io_counters()
-            if hasattr(self, '_last_net_io'):
-                bytes_sent_diff = net_io.bytes_sent - self._last_net_io.bytes_sent
-                bytes_recv_diff = net_io.bytes_recv - self._last_net_io.bytes_recv
-                time_diff = timestamp - self._last_net_timestamp
-                network_io_mbps = (bytes_sent_diff + bytes_recv_diff) / (1024 * 1024 * time_diff)
-            
-            self._last_net_io = net_io
-            self._last_net_timestamp = timestamp
-            
-            # Disk I/O
-            disk_io = psutil.disk_io_counters()
-            if hasattr(self, '_last_disk_io'):
-                bytes_read_diff = disk_io.read_bytes - self._last_disk_io.read_bytes
-                bytes_write_diff = disk_io.write_bytes - self._last_disk_io.write_bytes
-                time_diff = timestamp - self._last_disk_timestamp
-                disk_io_mbps = (bytes_read_diff + bytes_write_diff) / (1024 * 1024 * time_diff)
-            
-            self._last_disk_io = disk_io
-            self._last_disk_timestamp = timestamp
-            
-            # Temperature (if available)
-            try:
-                temps = psutil.sensors_temperatures()
-                if temps:
-                    temperature = np.mean([temp.current for sensor_temps in temps.values() 
-                                         for temp in sensor_temps])
-            except:
-                pass
+        """Collect current resource metrics."""
         
         # GPU metrics
-        gpu_memory_percent = 0.0
-        gpu_utilization = 0.0
+        gpu_utilization = {}
+        gpu_memory = {}
         
         if torch.cuda.is_available():
-            gpu_memory_percent = (torch.cuda.memory_allocated() / 
-                                torch.cuda.max_memory_allocated()) * 100
-            
-            # Try to get GPU utilization using nvidia-ml-py if available
-            try:
-                import pynvml
-                pynvml.nvmlInit()
-                handle = pynvml.nvmlDeviceGetHandleByIndex(0)
-                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
-                gpu_utilization = util.gpu
-            except:
-                pass
+            for gpu_id in range(torch.cuda.device_count()):
+                # Basic GPU metrics using torch
+                with torch.cuda.device(gpu_id):
+                    memory_used = torch.cuda.memory_allocated(gpu_id) / (1024**3)  # GB
+                    memory_total = torch.cuda.get_device_properties(gpu_id).total_memory / (1024**3)  # GB
+                    
+                    gpu_memory[gpu_id] = (memory_used, memory_total)
+                    
+                    # Estimate utilization based on memory usage
+                    gpu_utilization[gpu_id] = min(100.0, (memory_used / memory_total) * 100)
+        
+        # System metrics
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        memory_info = psutil.virtual_memory()
+        system_memory = (memory_info.used / (1024**3), memory_info.total / (1024**3))
         
         return ResourceMetrics(
-            timestamp=timestamp,
-            cpu_percent=cpu_percent,
-            memory_percent=memory_percent,
-            gpu_memory_percent=gpu_memory_percent,
+            timestamp=time.time(),
             gpu_utilization=gpu_utilization,
-            network_io_mbps=network_io_mbps,
-            disk_io_mbps=disk_io_mbps,
-            temperature_celsius=temperature,
-            power_consumption_watts=power_consumption
+            gpu_memory=gpu_memory,
+            cpu_utilization=cpu_percent,
+            system_memory=system_memory
         )
     
     def get_recent_metrics(self, window_seconds: float = 60.0) -> List[ResourceMetrics]:
-        """Get recent metrics within time window."""
+        """Get metrics from recent time window."""
         cutoff_time = time.time() - window_seconds
-        
-        with self._lock:
-            return [m for m in self.metrics_history if m.timestamp >= cutoff_time]
+        return [m for m in self.metrics_history if m.timestamp >= cutoff_time]
     
-    def get_average_metrics(self, window_seconds: float = 60.0) -> Optional[ResourceMetrics]:
-        """Get average metrics over time window."""
+    def calculate_resource_trends(self, window_seconds: float = 300.0) -> Dict[str, float]:
+        """Calculate resource usage trends."""
         recent_metrics = self.get_recent_metrics(window_seconds)
         
-        if not recent_metrics:
-            return None
+        if len(recent_metrics) < 2:
+            return {}
         
-        # Calculate averages
-        avg_metrics = ResourceMetrics(
-            timestamp=time.time(),
-            cpu_percent=np.mean([m.cpu_percent for m in recent_metrics]),
-            memory_percent=np.mean([m.memory_percent for m in recent_metrics]),
-            gpu_memory_percent=np.mean([m.gpu_memory_percent for m in recent_metrics]),
-            gpu_utilization=np.mean([m.gpu_utilization for m in recent_metrics]),
-            network_io_mbps=np.mean([m.network_io_mbps for m in recent_metrics]),
-            disk_io_mbps=np.mean([m.disk_io_mbps for m in recent_metrics]),
-            temperature_celsius=np.mean([m.temperature_celsius for m in recent_metrics]),
-            power_consumption_watts=np.mean([m.power_consumption_watts for m in recent_metrics])
-        )
+        trends = {}
         
-        return avg_metrics
+        # GPU utilization trend
+        gpu_utils = []
+        for metrics in recent_metrics:
+            if metrics.gpu_utilization:
+                gpu_utils.append(np.mean(list(metrics.gpu_utilization.values())))
+        
+        if len(gpu_utils) >= 2:
+            trends['gpu_utilization_trend'] = np.polyfit(range(len(gpu_utils)), gpu_utils, 1)[0]
+        
+        # Memory usage trend
+        memory_usage = [m.system_memory[0] / m.system_memory[1] * 100 for m in recent_metrics]
+        if len(memory_usage) >= 2:
+            trends['memory_trend'] = np.polyfit(range(len(memory_usage)), memory_usage, 1)[0]
+        
+        # CPU utilization trend
+        cpu_usage = [m.cpu_utilization for m in recent_metrics]
+        if len(cpu_usage) >= 2:
+            trends['cpu_trend'] = np.polyfit(range(len(cpu_usage)), cpu_usage, 1)[0]
+        
+        return trends
 
 
-class LoadBalancer:
-    """Intelligent load balancer for distributed training."""
+class PerformancePredictor:
+    """Predict performance impact of scaling decisions."""
     
-    def __init__(self, max_workers: int = 8):
-        self.max_workers = max_workers
-        self.worker_queues: Dict[int, queue.Queue] = {}
-        self.worker_metrics: Dict[int, List[float]] = defaultdict(list)
-        self.worker_loads: Dict[int, float] = defaultdict(float)
-        self._lock = threading.Lock()
+    def __init__(self, model_complexity: Optional[int] = None):
+        self.model_complexity = model_complexity or 1000000  # Default param count
         
-        self.logger = logging.getLogger(__name__)
-    
-    def add_worker(self, worker_id: int, queue_size: int = 100):
-        """Add a worker to the load balancer."""
-        with self._lock:
-            if worker_id not in self.worker_queues:
-                self.worker_queues[worker_id] = queue.Queue(maxsize=queue_size)
-                self.worker_loads[worker_id] = 0.0
-                self.logger.info(f"Added worker {worker_id}")
-    
-    def remove_worker(self, worker_id: int):
-        """Remove a worker from the load balancer."""
-        with self._lock:
-            if worker_id in self.worker_queues:
-                del self.worker_queues[worker_id]
-                del self.worker_loads[worker_id]
-                if worker_id in self.worker_metrics:
-                    del self.worker_metrics[worker_id]
-                self.logger.info(f"Removed worker {worker_id}")
-    
-    def get_best_worker(self) -> Optional[int]:
-        """Get the worker with lowest load."""
-        with self._lock:
-            if not self.worker_queues:
-                return None
-            
-            # Find worker with minimum load
-            best_worker = min(self.worker_loads.keys(), 
-                            key=lambda w: self.worker_loads[w])
-            
-            return best_worker
-    
-    def submit_task(self, task: Any) -> bool:
-        """Submit task to best available worker."""
-        worker_id = self.get_best_worker()
-        
-        if worker_id is None:
-            return False
-        
-        try:
-            self.worker_queues[worker_id].put(task, block=False)
-            with self._lock:
-                self.worker_loads[worker_id] += 1.0
-            return True
-        except queue.Full:
-            return False
-    
-    def update_worker_performance(self, worker_id: int, processing_time: float):
-        """Update worker performance metrics."""
-        with self._lock:
-            self.worker_metrics[worker_id].append(processing_time)
-            
-            # Keep only recent metrics
-            if len(self.worker_metrics[worker_id]) > 100:
-                self.worker_metrics[worker_id] = self.worker_metrics[worker_id][-100:]
-            
-            # Update load based on average processing time
-            if self.worker_metrics[worker_id]:
-                avg_time = np.mean(self.worker_metrics[worker_id])
-                queue_size = self.worker_queues[worker_id].qsize()
-                self.worker_loads[worker_id] = avg_time * queue_size
-    
-    def get_load_distribution(self) -> Dict[int, float]:
-        """Get current load distribution across workers."""
-        with self._lock:
-            return self.worker_loads.copy()
-    
-    def rebalance_load(self):
-        """Rebalance load across workers."""
-        with self._lock:
-            if len(self.worker_queues) < 2:
-                return
-            
-            # Find overloaded and underloaded workers
-            loads = list(self.worker_loads.values())
-            mean_load = np.mean(loads)
-            std_load = np.std(loads)
-            
-            overloaded_workers = [
-                wid for wid, load in self.worker_loads.items()
-                if load > mean_load + std_load
-            ]
-            
-            underloaded_workers = [
-                wid for wid, load in self.worker_loads.items()
-                if load < mean_load - std_load
-            ]
-            
-            # Move tasks from overloaded to underloaded workers
-            for overloaded_id in overloaded_workers:
-                if not underloaded_workers:
-                    break
-                
-                underloaded_id = underloaded_workers[0]
-                overloaded_queue = self.worker_queues[overloaded_id]
-                underloaded_queue = self.worker_queues[underloaded_id]
-                
-                # Move some tasks
-                tasks_to_move = min(3, overloaded_queue.qsize() // 2)
-                moved_tasks = []
-                
-                for _ in range(tasks_to_move):
-                    try:
-                        task = overloaded_queue.get(block=False)
-                        moved_tasks.append(task)
-                    except queue.Empty:
-                        break
-                
-                for task in moved_tasks:
-                    try:
-                        underloaded_queue.put(task, block=False)
-                    except queue.Full:
-                        # Put back in original queue if can't move
-                        overloaded_queue.put(task)
-                
-                # Update loads
-                self.worker_loads[overloaded_id] -= len(moved_tasks)
-                self.worker_loads[underloaded_id] += len(moved_tasks)
-                
-                if self.worker_loads[underloaded_id] >= mean_load:
-                    underloaded_workers.remove(underloaded_id)
-
-
-class PredictiveScaler:
-    """Predictive auto-scaler using workload patterns."""
-    
-    def __init__(self, prediction_window: int = 100):
-        self.prediction_window = prediction_window
-        self.workload_history = deque(maxlen=1000)
-        self.scaling_history = deque(maxlen=100)
-        
-        # Simple moving average for prediction
-        self.performance_predictor = self._create_predictor()
-        
-        self.logger = logging.getLogger(__name__)
-    
-    def _create_predictor(self):
-        """Create a simple performance predictor."""
-        # In a real implementation, this could be a more sophisticated ML model
-        return {
-            'throughput_weights': deque(maxlen=self.prediction_window),
-            'resource_weights': deque(maxlen=self.prediction_window),
-            'loss_weights': deque(maxlen=self.prediction_window)
+        # Performance models (simple linear models for demonstration)
+        self.throughput_model_params = {
+            'gpu_count': 0.8,       # 80% efficiency per additional GPU
+            'batch_size': 0.95,     # 95% efficiency per batch size increase  
+            'memory_limit': -0.1    # Performance degrades near memory limit
         }
-    
-    def update_workload_metrics(self, metrics: WorkloadMetrics):
-        """Update workload metrics for prediction."""
-        self.workload_history.append(metrics)
         
-        # Update predictor weights
-        if len(self.workload_history) >= 2:
-            prev_metrics = self.workload_history[-2]
-            throughput_change = metrics.throughput_samples_per_sec / prev_metrics.throughput_samples_per_sec
-            
-            self.performance_predictor['throughput_weights'].append(throughput_change)
-    
-    def predict_performance(
-        self, 
-        target_batch_size: int, 
-        target_replicas: int,
-        resource_metrics: ResourceMetrics
-    ) -> Tuple[float, float]:
-        """Predict performance for given configuration.
+        self.latency_model_params = {
+            'model_size': 1e-6,     # Latency increases with model size
+            'batch_size': 0.1,      # Slight latency increase with batch size
+            'gpu_count': -0.2       # Latency decreases with more GPUs
+        }
         
-        Returns:
-            Tuple of (predicted_throughput, confidence)
-        """
-        if len(self.workload_history) < 5:
-            return 0.0, 0.0
+        # Historical performance data
+        self.performance_history = []
         
-        recent_metrics = list(self.workload_history)[-10:]
-        
-        # Simple throughput prediction based on batch size scaling
-        current_throughput = np.mean([m.throughput_samples_per_sec for m in recent_metrics])
-        current_batch_size = np.mean([m.batch_size for m in recent_metrics])
-        
-        # Estimate throughput scaling with batch size
-        batch_scale_factor = target_batch_size / current_batch_size if current_batch_size > 0 else 1.0
-        
-        # Account for diminishing returns
-        if batch_scale_factor > 1:
-            batch_scale_factor = batch_scale_factor ** 0.8  # Diminishing returns
-        
-        # Account for multiple replicas
-        replica_efficiency = min(target_replicas * 0.9, target_replicas)  # 90% efficiency per replica
-        
-        # Resource utilization factor
-        resource_factor = 1.0
-        if resource_metrics.gpu_utilization > 90:
-            resource_factor = 0.8  # Bottleneck
-        elif resource_metrics.gpu_utilization < 50:
-            resource_factor = 1.2  # Underutilized
-        
-        predicted_throughput = current_throughput * batch_scale_factor * replica_efficiency * resource_factor
-        
-        # Confidence based on prediction window size and variance
-        throughput_variance = np.var([m.throughput_samples_per_sec for m in recent_metrics])
-        confidence = min(1.0, len(recent_metrics) / 10) * (1.0 / (1.0 + throughput_variance))
-        
-        return predicted_throughput, confidence
-    
-    def recommend_scaling(
+    def predict_throughput_change(
         self,
-        current_workload: WorkloadMetrics,
-        resource_metrics: ResourceMetrics,
-        performance_target: Dict[str, float]
-    ) -> ScalingDecision:
-        """Recommend scaling action based on current state and targets."""
+        current_config: Dict[str, Any],
+        proposed_config: Dict[str, Any]
+    ) -> float:
+        """Predict throughput change from scaling action."""
         
-        # Default decision
-        decision = ScalingDecision(
-            action="maintain",
-            target_replicas=1,
-            target_batch_size=current_workload.batch_size,
-            reason="No scaling needed",
-            confidence=0.5,
-            estimated_performance_gain=0.0,
-            estimated_cost_change=0.0
-        )
+        # Calculate throughput multiplier
+        gpu_multiplier = 1.0
+        if 'gpu_count' in proposed_config:
+            gpu_ratio = proposed_config['gpu_count'] / current_config.get('gpu_count', 1)
+            gpu_multiplier = 1 + (gpu_ratio - 1) * self.throughput_model_params['gpu_count']
         
-        target_throughput = performance_target.get('throughput_samples_per_sec', 0)
-        target_latency_ms = performance_target.get('latency_ms', 1000)
+        batch_multiplier = 1.0
+        if 'batch_size' in proposed_config:
+            batch_ratio = proposed_config['batch_size'] / current_config.get('batch_size', 1)
+            batch_multiplier = 1 + (batch_ratio - 1) * self.throughput_model_params['batch_size']
         
-        current_throughput = current_workload.throughput_samples_per_sec
+        # Memory pressure penalty
+        memory_penalty = 1.0
+        if 'memory_usage_pct' in current_config:
+            if current_config['memory_usage_pct'] > 80:
+                memory_penalty = 1 + (current_config['memory_usage_pct'] - 80) * self.throughput_model_params['memory_limit'] / 100
         
-        # Check if scaling is needed
-        if target_throughput > 0 and current_throughput < target_throughput * 0.8:
-            # Need to scale up
-            
-            # Determine scaling strategy
-            if resource_metrics.gpu_utilization < 70:
-                # Increase batch size
-                new_batch_size = min(current_workload.batch_size * 2, 512)
-                predicted_throughput, confidence = self.predict_performance(
-                    new_batch_size, 1, resource_metrics
-                )
-                
-                decision.action = "scale_up"
-                decision.target_batch_size = new_batch_size
-                decision.target_replicas = 1
-                decision.reason = f"Increase batch size to {new_batch_size} for better GPU utilization"
-                decision.confidence = confidence
-                decision.estimated_performance_gain = (predicted_throughput - current_throughput) / current_throughput
-                
-            else:
-                # Add more replicas
-                new_replicas = 2
-                predicted_throughput, confidence = self.predict_performance(
-                    current_workload.batch_size, new_replicas, resource_metrics
-                )
-                
-                decision.action = "scale_up"
-                decision.target_batch_size = current_workload.batch_size
-                decision.target_replicas = new_replicas
-                decision.reason = f"Add replica due to high GPU utilization ({resource_metrics.gpu_utilization:.1f}%)"
-                decision.confidence = confidence
-                decision.estimated_performance_gain = (predicted_throughput - current_throughput) / current_throughput
-                decision.estimated_cost_change = 1.0  # Double cost
+        predicted_multiplier = gpu_multiplier * batch_multiplier * memory_penalty
         
-        elif current_throughput > target_throughput * 1.2 and resource_metrics.gpu_utilization < 40:
-            # Can scale down
-            new_batch_size = max(current_workload.batch_size // 2, 1)
-            predicted_throughput, confidence = self.predict_performance(
-                new_batch_size, 1, resource_metrics
-            )
-            
-            if predicted_throughput >= target_throughput * 0.9:
-                decision.action = "scale_down"
-                decision.target_batch_size = new_batch_size
-                decision.target_replicas = 1
-                decision.reason = f"Reduce batch size to {new_batch_size} to save resources"
-                decision.confidence = confidence
-                decision.estimated_performance_gain = (predicted_throughput - current_throughput) / current_throughput
-                decision.estimated_cost_change = -0.5  # Save resources
+        return predicted_multiplier
+    
+    def predict_latency_change(
+        self,
+        current_config: Dict[str, Any],
+        proposed_config: Dict[str, Any]
+    ) -> float:
+        """Predict latency change from scaling action."""
         
-        self.scaling_history.append(decision)
-        return decision
+        # Simple latency prediction model
+        model_size_factor = self.model_complexity * self.latency_model_params['model_size']
+        
+        batch_size_factor = 0
+        if 'batch_size' in proposed_config:
+            batch_diff = proposed_config['batch_size'] - current_config.get('batch_size', 1)
+            batch_size_factor = batch_diff * self.latency_model_params['batch_size']
+        
+        gpu_factor = 0
+        if 'gpu_count' in proposed_config:
+            gpu_diff = proposed_config['gpu_count'] - current_config.get('gpu_count', 1)
+            gpu_factor = gpu_diff * self.latency_model_params['gpu_count']
+        
+        latency_change_pct = (model_size_factor + batch_size_factor + gpu_factor) * 100
+        
+        return max(-50, min(50, latency_change_pct))  # Clamp to reasonable range
+    
+    def predict_cost_change(
+        self,
+        current_config: Dict[str, Any],
+        proposed_config: Dict[str, Any],
+        gpu_cost_per_hour: float = 2.0
+    ) -> float:
+        """Predict cost change from scaling action."""
+        
+        current_gpus = current_config.get('gpu_count', 1)
+        proposed_gpus = proposed_config.get('gpu_count', current_gpus)
+        
+        cost_multiplier = proposed_gpus / current_gpus
+        
+        return cost_multiplier
 
 
 class IntelligentAutoScaler:
-    """Main intelligent auto-scaling orchestrator."""
+    """Intelligent auto-scaling system for QISA neural operators."""
     
     def __init__(
         self,
-        resource_monitor: Optional[ResourceMonitor] = None,
-        load_balancer: Optional[LoadBalancer] = None,
-        predictive_scaler: Optional[PredictiveScaler] = None,
-        scaling_interval: float = 30.0
+        model: nn.Module,
+        target_gpu_utilization: float = 80.0,
+        target_memory_utilization: float = 85.0,
+        min_throughput: float = 10.0,  # samples/second
+        max_cost_increase: float = 2.0,  # 2x cost increase limit
+        scaling_cooldown: float = 300.0,  # 5 minutes between scaling actions
+        enable_predictive_scaling: bool = True
     ):
-        self.resource_monitor = resource_monitor or ResourceMonitor()
-        self.load_balancer = load_balancer or LoadBalancer()
-        self.predictive_scaler = predictive_scaler or PredictiveScaler()
+        self.model = model
+        self.target_gpu_utilization = target_gpu_utilization
+        self.target_memory_utilization = target_memory_utilization
+        self.min_throughput = min_throughput
+        self.max_cost_increase = max_cost_increase
+        self.scaling_cooldown = scaling_cooldown
+        self.enable_predictive_scaling = enable_predictive_scaling
         
-        self.scaling_interval = scaling_interval
-        self.scaling_active = False
+        # Components
+        self.resource_monitor = ResourceMonitor()
+        self.performance_predictor = PerformancePredictor(
+            model_complexity=sum(p.numel() for p in model.parameters())
+        )
+        
+        # Scaling state
+        self.current_config = self._get_current_config()
+        self.last_scaling_time = 0.0
+        self.scaling_history = []
+        
+        # Auto-scaling settings
+        self.auto_scaling_enabled = False
         self.scaling_thread = None
-        
-        # Performance targets
-        self.performance_targets = {
-            'throughput_samples_per_sec': 100.0,
-            'latency_ms': 100.0,
-            'gpu_utilization_target': 80.0,
-            'memory_utilization_max': 90.0
-        }
-        
-        # Scaling cooldown to prevent oscillation
-        self.last_scaling_time = 0
-        self.scaling_cooldown = 120.0  # 2 minutes
+        self.stop_scaling_event = threading.Event()
         
         self.logger = logging.getLogger(__name__)
-    
-    def set_performance_targets(self, targets: Dict[str, float]):
-        """Set performance targets for auto-scaling."""
-        self.performance_targets.update(targets)
-        self.logger.info(f"Updated performance targets: {self.performance_targets}")
+        
+    def _get_current_config(self) -> Dict[str, Any]:
+        """Get current system configuration."""
+        return {
+            'gpu_count': torch.cuda.device_count() if torch.cuda.is_available() else 0,
+            'batch_size': 32,  # Default batch size
+            'model_parallel': False,
+            'mixed_precision': False
+        }
     
     def start_auto_scaling(self):
-        """Start auto-scaling in background."""
-        if not self.scaling_active:
-            self.scaling_active = True
-            self.resource_monitor.start_monitoring()
-            
-            self.scaling_thread = threading.Thread(target=self._scaling_loop, daemon=True)
-            self.scaling_thread.start()
-            
-            self.logger.info("Auto-scaling started")
+        """Start automatic scaling based on resource metrics."""
+        if self.auto_scaling_enabled:
+            return
+        
+        self.resource_monitor.start_monitoring()
+        self.auto_scaling_enabled = True
+        self.stop_scaling_event.clear()
+        
+        self.scaling_thread = threading.Thread(target=self._auto_scaling_loop, daemon=True)
+        self.scaling_thread.start()
+        
+        self.logger.info("Intelligent auto-scaling started")
     
     def stop_auto_scaling(self):
-        """Stop auto-scaling."""
-        self.scaling_active = False
+        """Stop automatic scaling."""
+        if not self.auto_scaling_enabled:
+            return
+        
+        self.auto_scaling_enabled = False
+        self.stop_scaling_event.set()
         self.resource_monitor.stop_monitoring()
         
         if self.scaling_thread:
@@ -607,145 +374,159 @@ class IntelligentAutoScaler:
         
         self.logger.info("Auto-scaling stopped")
     
-    def _scaling_loop(self):
-        """Main auto-scaling decision loop."""
-        while self.scaling_active:
-            try:
-                # Check cooldown period
-                if time.time() - self.last_scaling_time < self.scaling_cooldown:
-                    time.sleep(self.scaling_interval)
-                    continue
-                
-                # Get current metrics
-                resource_metrics = self.resource_monitor.get_average_metrics(60.0)
-                if resource_metrics is None:
-                    time.sleep(self.scaling_interval)
-                    continue
-                
-                # Check if we have recent workload metrics
-                if not self.predictive_scaler.workload_history:
-                    time.sleep(self.scaling_interval)
-                    continue
-                
-                current_workload = self.predictive_scaler.workload_history[-1]
-                
-                # Get scaling recommendation
-                scaling_decision = self.predictive_scaler.recommend_scaling(
-                    current_workload, resource_metrics, self.performance_targets
-                )
-                
-                # Execute scaling decision if confidence is high enough
-                if scaling_decision.confidence > 0.7 and scaling_decision.action != "maintain":
-                    self._execute_scaling_decision(scaling_decision)
-                    self.last_scaling_time = time.time()
-                
-                # Rebalance load periodically
-                self.load_balancer.rebalance_load()
-                
-                time.sleep(self.scaling_interval)
-                
-            except Exception as e:
-                self.logger.error(f"Error in scaling loop: {e}")
-                time.sleep(self.scaling_interval)
-    
-    def _execute_scaling_decision(self, decision: ScalingDecision):
-        """Execute a scaling decision."""
-        self.logger.info(f"Executing scaling decision: {decision.action}")
-        self.logger.info(f"Reason: {decision.reason}")
-        self.logger.info(f"Confidence: {decision.confidence:.2f}")
-        self.logger.info(f"Expected performance gain: {decision.estimated_performance_gain:.2%}")
+    def analyze_scaling_needs(self) -> Optional[ScalingAction]:
+        """Analyze current metrics and determine scaling needs."""
         
-        if decision.action == "scale_up":
-            if decision.target_replicas > 1:
-                # Add workers
-                current_workers = len(self.load_balancer.worker_queues)
-                for i in range(current_workers, decision.target_replicas):
-                    self.load_balancer.add_worker(i)
+        current_metrics = self.resource_monitor.current_metrics
+        if not current_metrics:
+            return None
+        
+        # Analyze GPU utilization
+        if current_metrics.gpu_utilization:
+            avg_gpu_util = np.mean(list(current_metrics.gpu_utilization.values()))
             
-        elif decision.action == "scale_down":
-            # Remove workers
-            current_workers = len(self.load_balancer.worker_queues)
-            workers_to_remove = max(0, current_workers - decision.target_replicas)
+            if avg_gpu_util < 50:  # Under-utilized
+                return self._suggest_scale_down_action(current_metrics)
+            elif avg_gpu_util > self.target_gpu_utilization:  # Over-utilized
+                return self._suggest_scale_up_action(current_metrics)
+        
+        # Analyze memory utilization
+        total_memory_used = 0
+        total_memory_available = 0
+        
+        for gpu_id, (used, total) in current_metrics.gpu_memory.items():
+            total_memory_used += used
+            total_memory_available += total
+        
+        if total_memory_available > 0:
+            memory_util_pct = (total_memory_used / total_memory_available) * 100
             
-            for i in range(workers_to_remove):
-                worker_id = max(self.load_balancer.worker_queues.keys())
-                self.load_balancer.remove_worker(worker_id)
+            if memory_util_pct > self.target_memory_utilization:
+                return self._suggest_memory_optimization_action(current_metrics)
         
-        # Note: Batch size changes would need to be communicated to the training loop
-        # This is implementation-specific and would depend on the training framework
+        return ScalingAction(
+            action_type=ScalingDecision.MAINTAIN,
+            resource_type=ResourceType.GPU,
+            current_value=len(current_metrics.gpu_utilization),
+            target_value=len(current_metrics.gpu_utilization),
+            estimated_impact={},
+            confidence=1.0,
+            reasoning="All metrics within target ranges"
+        )
     
-    def update_workload_metrics(self, metrics: WorkloadMetrics):
-        """Update current workload metrics."""
-        self.predictive_scaler.update_workload_metrics(metrics)
+    def _suggest_scale_up_action(self, metrics: ResourceMetrics) -> ScalingAction:
+        """Suggest scale-up action based on high utilization."""
+        
+        current_gpus = len(metrics.gpu_utilization)
+        target_gpus = min(current_gpus + 1, 8)  # Max 8 GPUs
+        
+        return ScalingAction(
+            action_type=ScalingDecision.SCALE_UP,
+            resource_type=ResourceType.GPU,
+            current_value=current_gpus,
+            target_value=target_gpus,
+            estimated_impact={'throughput_change': 1.5, 'cost_change': 2.0},
+            confidence=0.8,
+            reasoning=f"High GPU utilization ({np.mean(list(metrics.gpu_utilization.values())):.1f}%)"
+        )
     
-    def get_scaling_status(self) -> Dict[str, Any]:
-        """Get current scaling status and metrics."""
-        resource_metrics = self.resource_monitor.get_average_metrics(60.0)
-        load_distribution = self.load_balancer.get_load_distribution()
+    def _suggest_scale_down_action(self, metrics: ResourceMetrics) -> ScalingAction:
+        """Suggest scale-down action based on low utilization."""
         
-        recent_workload = None
-        if self.predictive_scaler.workload_history:
-            recent_workload = self.predictive_scaler.workload_history[-1].to_dict()
+        current_gpus = len(metrics.gpu_utilization)
+        if current_gpus <= 1:
+            return None  # Cannot scale down below 1 GPU
         
-        recent_scaling = None
-        if self.predictive_scaler.scaling_history:
-            recent_scaling = self.predictive_scaler.scaling_history[-1].to_dict()
+        target_gpus = current_gpus - 1
+        
+        return ScalingAction(
+            action_type=ScalingDecision.SCALE_DOWN,
+            resource_type=ResourceType.GPU,
+            current_value=current_gpus,
+            target_value=target_gpus,
+            estimated_impact={'throughput_change': 0.7, 'cost_change': 0.5},
+            confidence=0.7,
+            reasoning=f"Low GPU utilization ({np.mean(list(metrics.gpu_utilization.values())):.1f}%)"
+        )
+    
+    def _suggest_memory_optimization_action(self, metrics: ResourceMetrics) -> ScalingAction:
+        """Suggest memory optimization action."""
+        
+        current_batch_size = self.current_config.get('batch_size', 32)
+        target_batch_size = max(1, current_batch_size // 2)  # Reduce batch size
+        
+        return ScalingAction(
+            action_type=ScalingDecision.OPTIMIZE,
+            resource_type=ResourceType.BATCH_SIZE,
+            current_value=current_batch_size,
+            target_value=target_batch_size,
+            estimated_impact={'memory_reduction': 0.5, 'throughput_change': 0.8},
+            confidence=0.9,
+            reasoning="High memory utilization, reducing batch size"
+        )
+    
+    def get_scaling_report(self) -> Dict[str, Any]:
+        """Generate scaling system report."""
+        
+        current_metrics = self.resource_monitor.current_metrics
+        
+        # Calculate average utilization
+        avg_gpu_util = 0
+        avg_memory_util = 0
+        
+        if current_metrics and current_metrics.gpu_utilization:
+            avg_gpu_util = np.mean(list(current_metrics.gpu_utilization.values()))
+            
+            total_memory_used = sum(used for used, _ in current_metrics.gpu_memory.values())
+            total_memory_available = sum(total for _, total in current_metrics.gpu_memory.values())
+            avg_memory_util = (total_memory_used / total_memory_available * 100) if total_memory_available > 0 else 0
         
         return {
-            'scaling_active': self.scaling_active,
-            'performance_targets': self.performance_targets,
-            'resource_metrics': resource_metrics.to_dict() if resource_metrics else None,
-            'load_distribution': load_distribution,
-            'recent_workload_metrics': recent_workload,
-            'recent_scaling_decision': recent_scaling,
-            'cooldown_remaining': max(0, self.scaling_cooldown - (time.time() - self.last_scaling_time))
+            'auto_scaling_enabled': self.auto_scaling_enabled,
+            'current_config': self.current_config,
+            'target_utilization': {
+                'gpu': self.target_gpu_utilization,
+                'memory': self.target_memory_utilization
+            },
+            'current_utilization': {
+                'gpu': avg_gpu_util,
+                'memory': avg_memory_util,
+                'cpu': current_metrics.cpu_utilization if current_metrics else 0
+            },
+            'scaling_history': len(self.scaling_history),
+            'recent_scaling_actions': self.scaling_history[-5:] if self.scaling_history else [],
+            'monitoring_stats': {
+                'metrics_collected': len(self.resource_monitor.metrics_history),
+                'monitoring_active': self.resource_monitor.monitoring_active
+            }
         }
-    
-    def force_scaling_decision(
-        self, 
-        action: str, 
-        target_replicas: int = 1, 
-        target_batch_size: Optional[int] = None
-    ) -> bool:
-        """Force a specific scaling decision."""
-        if time.time() - self.last_scaling_time < 10.0:  # Minimum 10s between forced decisions
-            return False
-        
-        current_workload = None
-        if self.predictive_scaler.workload_history:
-            current_workload = self.predictive_scaler.workload_history[-1]
-            current_batch_size = current_workload.batch_size
-        else:
-            current_batch_size = 32
-        
-        decision = ScalingDecision(
-            action=action,
-            target_replicas=target_replicas,
-            target_batch_size=target_batch_size or current_batch_size,
-            reason="Manual scaling decision",
-            confidence=1.0,
-            estimated_performance_gain=0.0,
-            estimated_cost_change=0.0
-        )
-        
-        self._execute_scaling_decision(decision)
-        self.last_scaling_time = time.time()
-        
-        return True
 
 
-@contextmanager
-def auto_scaling_context(
-    performance_targets: Dict[str, float],
-    scaling_interval: float = 30.0
-):
-    """Context manager for automatic scaling during training."""
+def create_intelligent_auto_scaler(
+    model: nn.Module,
+    scaling_config: Optional[Dict[str, Any]] = None
+) -> IntelligentAutoScaler:
+    """Factory function to create intelligent auto-scaler.
     
-    auto_scaler = IntelligentAutoScaler(scaling_interval=scaling_interval)
-    auto_scaler.set_performance_targets(performance_targets)
-    auto_scaler.start_auto_scaling()
+    Args:
+        model: Neural operator model to scale
+        scaling_config: Scaling configuration
+        
+    Returns:
+        Configured IntelligentAutoScaler
+    """
     
-    try:
-        yield auto_scaler
-    finally:
-        auto_scaler.stop_auto_scaling()
+    default_config = {
+        'target_gpu_utilization': 80.0,
+        'target_memory_utilization': 85.0,
+        'min_throughput': 10.0,
+        'max_cost_increase': 2.0,
+        'scaling_cooldown': 300.0,
+        'enable_predictive_scaling': True
+    }
+    
+    config = {**default_config, **(scaling_config or {})}
+    
+    auto_scaler = IntelligentAutoScaler(model, **config)
+    
+    return auto_scaler
