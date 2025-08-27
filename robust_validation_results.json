@@ -1,0 +1,318 @@
+{
+  "performance": [
+    {
+      "batch_size": 1,
+      "duration": 0.0022263526916503906,
+      "throughput": 449.16513171985434
+    },
+    {
+      "batch_size": 5,
+      "duration": 0.009777307510375977,
+      "throughput": 511.3882318515448
+    },
+    {
+      "batch_size": 10,
+      "duration": 0.01765584945678711,
+      "throughput": 566.3845302076863
+    },
+    {
+      "batch_size": 20,
+      "duration": 0.038872718811035156,
+      "throughput": 514.499644267805
+    }
+  ],
+  "diagnostics": {
+    "name": "test_model",
+    "architecture": {
+      "input_dim": 64,
+      "hidden_dim": 32,
+      "output_dim": 16,
+      "parameters": 3664
+    },
+    "metrics": {
+      "mse": Infinity,
+      "mae": Infinity,
+      "relative_error": Infinity,
+      "inference_time": 0.03868222236633301,
+      "numerical_stability": false,
+      "error_count": 1
+    },
+    "matrix_diagnostics": {
+      "w1": {
+        "name": "w1",
+        "shape": [
+          64,
+          32
+        ],
+        "health_info": {
+          "healthy": true,
+          "min": -0.24967354381739498,
+          "max": 0.24900459941783087,
+          "mean": -0.0006344298766369867,
+          "std": 0.1481297536787351,
+          "has_nan": false,
+          "has_inf": false,
+          "has_large_values": false,
+          "condition_estimate": null,
+          "element_count": 2048
+        },
+        "operation_count": 0,
+        "recent_operations": [],
+        "stability_report": {
+          "status": "stable",
+          "checks_performed": 1,
+          "recent_health_rate": 1.0,
+          "last_check": {
+            "name": "w1",
+            "timestamp": 1756313701.239235,
+            "health_info": {
+              "healthy": true,
+              "min": -0.24967354381739498,
+              "max": 0.24900459941783087,
+              "mean": -0.0006344298766369867,
+              "std": 0.1481297536787351,
+              "has_nan": false,
+              "has_inf": false,
+              "has_large_values": false,
+              "condition_estimate": null,
+              "element_count": 2048
+            }
+          }
+        }
+      },
+      "b1": {
+        "name": "b1",
+        "shape": [
+          1,
+          32
+        ],
+        "health_info": {
+          "healthy": true,
+          "min": -0.41033037201974043,
+          "max": 0.4010421999780378,
+          "mean": 0.0004889033988834052,
+          "std": 0.25198787968781045,
+          "has_nan": false,
+          "has_inf": false,
+          "has_large_values": false,
+          "condition_estimate": null,
+          "element_count": 32
+        },
+        "operation_count": 0,
+        "recent_operations": [],
+        "stability_report": {
+          "status": "stable",
+          "checks_performed": 1,
+          "recent_health_rate": 1.0,
+          "last_check": {
+            "name": "b1",
+            "timestamp": 1756313701.2394855,
+            "health_info": {
+              "healthy": true,
+              "min": -0.41033037201974043,
+              "max": 0.4010421999780378,
+              "mean": 0.0004889033988834052,
+              "std": 0.25198787968781045,
+              "has_nan": false,
+              "has_inf": false,
+              "has_large_values": false,
+              "condition_estimate": null,
+              "element_count": 32
+            }
+          }
+        }
+      },
+      "w2": {
+        "name": "w2",
+        "shape": [
+          32,
+          32
+        ],
+        "health_info": {
+          "healthy": true,
+          "min": -0.30591560690288,
+          "max": 0.3055261236115596,
+          "mean": 0.005324894494649339,
+          "std": 0.1758196833938775,
+          "has_nan": false,
+          "has_inf": false,
+          "has_large_values": false,
+          "condition_estimate": 155745.9068600608,
+          "element_count": 1024
+        },
+        "operation_count": 0,
+        "recent_operations": [],
+        "stability_report": {
+          "status": "stable",
+          "checks_performed": 1,
+          "recent_health_rate": 1.0,
+          "last_check": {
+            "name": "w2",
+            "timestamp": 1756313701.242397,
+            "health_info": {
+              "healthy": true,
+              "min": -0.30591560690288,
+              "max": 0.3055261236115596,
+              "mean": 0.005324894494649339,
+              "std": 0.1758196833938775,
+              "has_nan": false,
+              "has_inf": false,
+              "has_large_values": false,
+              "condition_estimate": 155745.9068600608,
+              "element_count": 1024
+            }
+          }
+        }
+      },
+      "b2": {
+        "name": "b2",
+        "shape": [
+          1,
+          32
+        ],
+        "health_info": {
+          "healthy": true,
+          "min": -0.4043650742188224,
+          "max": 0.4219892025680312,
+          "mean": -0.04169501507790508,
+          "std": 0.2638200792738542,
+          "has_nan": false,
+          "has_inf": false,
+          "has_large_values": false,
+          "condition_estimate": null,
+          "element_count": 32
+        },
+        "operation_count": 0,
+        "recent_operations": [],
+        "stability_report": {
+          "status": "stable",
+          "checks_performed": 1,
+          "recent_health_rate": 1.0,
+          "last_check": {
+            "name": "b2",
+            "timestamp": 1756313701.2425785,
+            "health_info": {
+              "healthy": true,
+              "min": -0.4043650742188224,
+              "max": 0.4219892025680312,
+              "mean": -0.04169501507790508,
+              "std": 0.2638200792738542,
+              "has_nan": false,
+              "has_inf": false,
+              "has_large_values": false,
+              "condition_estimate": null,
+              "element_count": 32
+            }
+          }
+        }
+      },
+      "w3": {
+        "name": "w3",
+        "shape": [
+          32,
+          16
+        ],
+        "health_info": {
+          "healthy": true,
+          "min": -0.35240484374769976,
+          "max": 0.35101886539237587,
+          "mean": -0.0019278760495924111,
+          "std": 0.2069805571801632,
+          "has_nan": false,
+          "has_inf": false,
+          "has_large_values": false,
+          "condition_estimate": null,
+          "element_count": 512
+        },
+        "operation_count": 0,
+        "recent_operations": [],
+        "stability_report": {
+          "status": "stable",
+          "checks_performed": 1,
+          "recent_health_rate": 1.0,
+          "last_check": {
+            "name": "w3",
+            "timestamp": 1756313701.2437844,
+            "health_info": {
+              "healthy": true,
+              "min": -0.35240484374769976,
+              "max": 0.35101886539237587,
+              "mean": -0.0019278760495924111,
+              "std": 0.2069805571801632,
+              "has_nan": false,
+              "has_inf": false,
+              "has_large_values": false,
+              "condition_estimate": null,
+              "element_count": 512
+            }
+          }
+        }
+      },
+      "b3": {
+        "name": "b3",
+        "shape": [
+          1,
+          16
+        ],
+        "health_info": {
+          "healthy": true,
+          "min": -0.5789882648911672,
+          "max": 0.39970779299960646,
+          "mean": 0.0035134127289160808,
+          "std": 0.29072734948502815,
+          "has_nan": false,
+          "has_inf": false,
+          "has_large_values": false,
+          "condition_estimate": null,
+          "element_count": 16
+        },
+        "operation_count": 0,
+        "recent_operations": [],
+        "stability_report": {
+          "status": "stable",
+          "checks_performed": 1,
+          "recent_health_rate": 1.0,
+          "last_check": {
+            "name": "b3",
+            "timestamp": 1756313701.2439015,
+            "health_info": {
+              "healthy": true,
+              "min": -0.5789882648911672,
+              "max": 0.39970779299960646,
+              "mean": 0.0035134127289160808,
+              "std": 0.29072734948502815,
+              "has_nan": false,
+              "has_inf": false,
+              "has_large_values": false,
+              "condition_estimate": null,
+              "element_count": 16
+            }
+          }
+        }
+      }
+    },
+    "stability_report": {
+      "status": "stable",
+      "checks_performed": 6,
+      "recent_health_rate": 1.0,
+      "last_check": {
+        "name": "output",
+        "timestamp": 1756313701.3332834,
+        "health_info": {
+          "healthy": true,
+          "min": -1.9503166781716001,
+          "max": 1.3712590538516407,
+          "mean": 0.0160330513652883,
+          "std": 0.5921378517360915,
+          "has_nan": false,
+          "has_inf": false,
+          "has_large_values": false,
+          "condition_estimate": null,
+          "element_count": 320
+        }
+      }
+    },
+    "timestamp": 1756313701.3798625
+  },
+  "robustness_score": 55
+}

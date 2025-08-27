@@ -9,7 +9,11 @@ __author__ = "Daniel Schmidt"
 __email__ = "daniel@terragon.ai"
 
 # Always available core imports
-from neural_operator_lab.config import configure_security
+try:
+    from .config import configure_security
+except ImportError:
+    def configure_security():
+        pass
 
 # Conditional imports that depend on external libraries
 __all__ = ["__version__", "configure_security"]
@@ -19,12 +23,12 @@ try:
     import torch
     _HAS_TORCH = True
     
-    from neural_operator_lab.models import (
+    from .models import (
         FourierNeuralOperator,
         ProbabilisticNeuralOperator, 
         TransformerNeuralOperator
     )
-    from neural_operator_lab.training import Trainer, TrainerConfig
+    from .training import Trainer, TrainerConfig
     
     __all__.extend([
         "FourierNeuralOperator",
@@ -39,28 +43,28 @@ except ImportError:
 
 # Try to import optional data modules
 try:
-    from neural_operator_lab.data import PDEDataset, create_pde_dataset
+    from .data import PDEDataset, create_pde_dataset
     __all__.extend(["PDEDataset", "create_pde_dataset"])
 except ImportError:
     pass
 
 # Try to import analytics modules  
 try:
-    from neural_operator_lab.analytics import MetricsTracker, PerformanceAnalyzer
+    from .analytics import MetricsTracker, PerformanceAnalyzer
     __all__.extend(["MetricsTracker", "PerformanceAnalyzer"])
 except ImportError:
     pass
 
 # Try to import security modules
 try:
-    from neural_operator_lab.security import InputValidator, SecureModelLoader
+    from .security import InputValidator, SecureModelLoader
     __all__.extend(["InputValidator", "SecureModelLoader"])
 except ImportError:
     pass
 
 # Try to import optimization modules
 try:
-    from neural_operator_lab.optimization import MemoryOptimizer
+    from .optimization import MemoryOptimizer
     __all__.extend(["MemoryOptimizer"])
 except ImportError:
     pass
