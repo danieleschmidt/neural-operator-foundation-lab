@@ -1,0 +1,99 @@
+{
+  "single_request_time": 0.001363515853881836,
+  "batch_performance": [
+    {
+      "batch_size": 1,
+      "time": 0.0006270408630371094,
+      "throughput": 1594.7923954372623
+    },
+    {
+      "batch_size": 5,
+      "time": 0.002608060836791992,
+      "throughput": 1917.1331931620807
+    },
+    {
+      "batch_size": 10,
+      "time": 0.005286216735839844,
+      "throughput": 1891.712069276565
+    },
+    {
+      "batch_size": 20,
+      "time": 0.009985923767089844,
+      "throughput": 2002.819214974692
+    },
+    {
+      "batch_size": 50,
+      "time": 0.0269472599029541,
+      "throughput": 1855.4762220747623
+    }
+  ],
+  "cache_stats": {
+    "entries": 92,
+    "size_mb": 0.007984161376953125,
+    "hit_rate": 0.05154639175257732,
+    "hits": 5,
+    "misses": 92
+  },
+  "load_balancer_stats": {
+    "models": 1,
+    "current_loads": [
+      0
+    ],
+    "total_requests": 102,
+    "avg_load": 0.0
+  },
+  "memory_stats": {
+    "pools": 0,
+    "total_matrices": 0,
+    "current_size_mb": 0.0,
+    "hit_rate": 0,
+    "hits": 0,
+    "misses": 0
+  },
+  "comprehensive_stats": {
+    "cluster_performance": {
+      "total_requests": 107,
+      "avg_processing_time": 0.0005600073627222364,
+      "error_rate": 0.0,
+      "throughput_rps": 6.09231779667637e-08
+    },
+    "caching": {
+      "hit_rate": 0.04672897196261682,
+      "cache_stats": {
+        "entries": 102,
+        "size_mb": 0.008852005004882812,
+        "hit_rate": 0.04672897196261682,
+        "hits": 5,
+        "misses": 102
+      }
+    },
+    "memory_pool": {
+      "pools": 0,
+      "total_matrices": 0,
+      "current_size_mb": 0.0,
+      "hit_rate": 0,
+      "hits": 0,
+      "misses": 0
+    },
+    "load_balancer": {
+      "models": 1,
+      "current_loads": [
+        0
+      ],
+      "total_requests": 102,
+      "avg_load": 0.0
+    },
+    "auto_scaler": {
+      "replicas": 2,
+      "min_replicas": 1,
+      "max_replicas": 4
+    },
+    "configuration": {
+      "max_memory_gb": 2.0,
+      "max_workers": 4,
+      "enable_caching": true,
+      "enable_auto_scaling": true
+    }
+  },
+  "scalability_score": 70
+}
