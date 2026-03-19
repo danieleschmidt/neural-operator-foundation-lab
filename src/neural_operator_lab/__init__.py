@@ -1,128 +1,17 @@
-"""Neural Operator Foundation Lab
+"""Neural Operator Foundation Lab — tools for learning mappings between function spaces."""
 
-A comprehensive framework for training and benchmarking neural operators
-on high-dimensional PDEs (turbulence, electromagnetics, elasticity).
-"""
+from .fno import FourierNeuralOperator1d, FourierNeuralOperator2d, SpectralConv1d, SpectralConv2d
+from .deeponet import DeepONet
+from .data import PDEDataGenerator
+from .trainer import OperatorTrainer
 
 __version__ = "0.2.0"
-__author__ = "Daniel Schmidt" 
-__email__ = "daniel@terragon.ai"
-
-# Always available core imports
-try:
-    from .config import configure_security
-except ImportError:
-    def configure_security():
-        pass
-
-# Conditional imports that depend on external libraries
-__all__ = ["__version__", "configure_security"]
-
-# Try to import torch-dependent modules
-try:
-    import torch
-    _HAS_TORCH = True
-    
-    from .models import (
-        FourierNeuralOperator,
-        ProbabilisticNeuralOperator, 
-        TransformerNeuralOperator
-    )
-    from .training import Trainer, TrainerConfig
-    
-    __all__.extend([
-        "FourierNeuralOperator",
-        "ProbabilisticNeuralOperator", 
-        "TransformerNeuralOperator",
-        "Trainer",
-        "TrainerConfig"
-    ])
-    
-except ImportError:
-    _HAS_TORCH = False
-
-# Try to import optional data modules
-try:
-    from .data import PDEDataset, create_pde_dataset
-    __all__.extend(["PDEDataset", "create_pde_dataset"])
-except ImportError:
-    pass
-
-# Try to import analytics modules  
-try:
-    from .analytics import MetricsTracker, PerformanceAnalyzer
-    __all__.extend(["MetricsTracker", "PerformanceAnalyzer"])
-except ImportError:
-    pass
-
-# Try to import security modules
-try:
-    from .security import InputValidator, SecureModelLoader
-    __all__.extend(["InputValidator", "SecureModelLoader"])
-except ImportError:
-    pass
-
-# Try to import optimization modules
-try:
-    from .optimization import MemoryOptimizer
-    __all__.extend(["MemoryOptimizer"])
-except ImportError:
-    pass
-
-def get_available_modules():
-    """Get list of available modules based on installed dependencies."""
-    available = ["config"]
-    
-    if _HAS_TORCH:
-        available.extend(["models", "training", "base", "utils"])
-    
-    try:
-        import h5py
-        available.append("data")
-    except ImportError:
-        pass
-        
-    try:
-        import numpy
-        available.append("analytics")
-    except ImportError:
-        pass
-    
-    return available
-
-def check_dependencies():
-    """Check which optional dependencies are installed."""
-    deps = {}
-    
-    # Core dependencies
-    try:
-        import torch
-        deps['torch'] = torch.__version__
-    except ImportError:
-        deps['torch'] = None
-        
-    try:
-        import numpy
-        deps['numpy'] = numpy.__version__
-    except ImportError:
-        deps['numpy'] = None
-        
-    try:
-        import h5py
-        deps['h5py'] = h5py.__version__
-    except ImportError:
-        deps['h5py'] = None
-        
-    try:
-        import scipy
-        deps['scipy'] = scipy.__version__
-    except ImportError:
-        deps['scipy'] = None
-        
-    try:
-        import matplotlib
-        deps['matplotlib'] = matplotlib.__version__
-    except ImportError:
-        deps['matplotlib'] = None
-    
-    return deps
+__all__ = [
+    "FourierNeuralOperator1d",
+    "FourierNeuralOperator2d",
+    "SpectralConv1d",
+    "SpectralConv2d",
+    "DeepONet",
+    "PDEDataGenerator",
+    "OperatorTrainer",
+]

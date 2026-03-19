@@ -1,1 +1,0 @@
-"""Test fixtures and data for Neural Operator Foundation Lab."""
